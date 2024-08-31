@@ -1,77 +1,94 @@
 function Get-ResourceName {
-    param (
-        [string]$prefix,
-        [string]$resourceType,
-        [string]$separator = "",
-        [string]$convention = "pascal",
-        [int]$maxLength = 24,
-        [string]$extra = ""
+    <#
+    .EXAMPLE
+        Get-ResourceName -Name azurerm_virtual_machine -Prefix tsp,dev,neu -Suffix phx,tst
+    #>
+    [cmdletbinding()]
+    param(
+    [string]
+        $Name,
+
+        [string[]]
+        $Prefix,
+        
+        [string[]]
+        $Suffix,
+
+        [string]
+        $Seperator = '-',
+
+        [bool]
+        $CleanInput = $true
     )
 
-    # Helper function to apply case conventions
-    function ConvertToConvention {
+    function Get-CleanString {
         param (
-            [string]$name,
-            [string]$convention
+            [string[]]$InputObject,
+            [string]$Pattern
         )
 
-        switch ($convention) {
-            "camel" {
-                return (-join ($name[0].ToLower() + $name.Substring(1)))
-            }
-            "pascal" {
-                return ($name -replace '(\w)(\w*)', { 
-                    param($m)
-                    $m.Groups[1].Value.ToUpper() + $m.Groups[2].Value.ToLower() 
-                })
-            }
-            "kebab" {
-                return ($name -replace '\s+', '-').ToLower()
-            }
-            "snake" {
-                return ($name -replace '\s+', '_').ToLower()
-            }
-            default { 
-                return $name 
-            }
+        foreach ($Str in $InputObject) {
+            $Str -replace $Pattern,''
         }
     }
 
-    # Define the length rule based on resource type (simplified example)
-    $lengthRule = @{
-        "storage_account" = 24;
-        "resource_group" = 90;
-        "virtual_machine" = 15;
+    function Get-TrimString {
+        param (
+            [string]$InputObject,
+            [int]$MaxLength
+        )
+
+        if ($InputObject.Length -gt $MaxLength) {
+            $InputObject.Substring(0, $MaxLength -1)
+        }
+        else {
+            $InputObject
+        }
     }
 
-    # Determine the maximum allowed length for the resource type
-    if ($lengthRule.ContainsKey($resourceType)) {
-        $maxAllowedLength = $lengthRule[$resourceType]
-    } else {
-        $maxAllowedLength = $maxLength
+    $resources = Get-Content $PSScriptRoot/resourceDefinition.json | ConvertFrom-Json
+
+    $resource = $resources | Where-Object { $_.name -eq $Name }
+
+    
+    if ($resource) {
+
+        $ResourceRegex = $resource.regex.trimstart('"').trimend('"')
+        $ValidationRegex = $resource.validation_regex.trimstart('"').trimend('"')
+
+        if ($CleanInput) {
+            $Prefix = Get-CleanString -InputObject $Prefix -Pattern $ResourceRegex
+            $Suffix = Get-CleanString -InputObject $Suffix -Pattern $ResourceRegex
+        }
+        
+        $resourceArr = @()
+
+        $resourceArr += $Prefix
+        $resourceArr += $resource.slug
+        $resourceArr += $Suffix
+
+        $Seperator = if ($resource.dashes) { $Seperator } else { '' }
+
+        $resourceName = $resourceArr -join $Seperator
+
+        if ($resource.lowercase -and $resourceName -cnotmatch "^[a-z]*$") {
+            $resourceName = $resourceName.tolower()
+            Write-Warning "Resource name has been converted to lower case due to naming requirement."
+        }
+
+        if ($resourceName.length -gt $resource.max_length) {
+            $resourceName = $resourceName.Substring(0, $resource.max_length -1)
+            Write-Warning "Resource name has been trimmed to $($resource.max_length) characters due to max length restriction."
+        }
+
+        if ($resourceName -notmatch $ValidationRegex) {
+            Write-Error "invalid name for CAF naming $Name, the pattern $ValidationRegex doesn't match $resourceName"
+        }
+        else {
+            return $resourceName
+        }
     }
-
-    # Combine prefix and resource type
-    $combinedName = "$prefix$separator$resourceType$extra"
-
-    # Ensure the name is within the allowed length
-    if ($combinedName.Length -gt $maxAllowedLength) {
-        $combinedName = $combinedName.Substring(0, $maxAllowedLength)
+    else {
+        Write-Error "$Name not known."
     }
-
-    # Apply the convention
-    $formattedName = ConvertToConvention -name $combinedName -convention $convention
-
-    return $formattedName
 }
-
-# Example usage
-$prefix = "myPrefix"
-$resourceType = "storage_account"
-$separator = "-"
-$convention = "snake"
-$maxLength = 24
-$extra = "extraText"
-
-$resourceName = Get-ResourceName -prefix $prefix -resourceType $resourceType -separator $separator -convention $convention -maxLength $maxLength -extra $extra
-Write-Output "Generated Resource Name: $resourceName"
