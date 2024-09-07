@@ -50,15 +50,11 @@ function Get-ResourceName {
 
     $resource = $resources | Where-Object { $_.name -eq $Name }
 
-    
     if ($resource) {
 
-        $ResourceRegex = $resource.regex.trimstart('"').trimend('"')
-        $ValidationRegex = $resource.validation_regex.trimstart('"').trimend('"')
-
         if ($CleanInput) {
-            $Prefix = Get-CleanString -InputObject $Prefix -Pattern $ResourceRegex
-            $Suffix = Get-CleanString -InputObject $Suffix -Pattern $ResourceRegex
+            $Prefix = Get-CleanString -InputObject $Prefix -Pattern $resource.regex
+            $Suffix = Get-CleanString -InputObject $Suffix -Pattern $resource.regex
         }
         
         $resourceArr = @()
@@ -71,22 +67,21 @@ function Get-ResourceName {
 
         $resourceName = $resourceArr -join $Seperator
 
-        if ($resource.lowercase -and $resourceName -cnotmatch "^[a-z]*$") {
+        if ($resource.lowercase -and $resourceName -cmatch "[A-Z]*$") {
             $resourceName = $resourceName.tolower()
             Write-Warning "Resource name has been converted to lower case due to naming requirement."
         }
 
-        if ($resourceName.length -gt $resource.max_length) {
-            $resourceName = $resourceName.Substring(0, $resource.max_length -1)
-            Write-Warning "Resource name has been trimmed to $($resource.max_length) characters due to max length restriction."
+        if ($resourceName.length -gt $resource.length.max) {
+            $resourceName = $resourceName.Substring(0, $resource.length.max -1)
+            Write-Warning "Resource name has been trimmed to $($resource.length.max) characters due to max length restriction."
         }
 
-        if ($resourceName -notmatch $ValidationRegex) {
-            Write-Error "invalid name for CAF naming $Name, the pattern $ValidationRegex doesn't match $resourceName"
+        if ($resourceName -cnotmatch $resource.regex) {
+            Write-Error "faled validation $resourceName does not match $($resource.regex)"
         }
-        else {
-            return $resourceName
-        }
+
+        return $resourceName
     }
     else {
         Write-Error "$Name not known."
