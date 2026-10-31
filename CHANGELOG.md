@@ -1,5 +1,13 @@
 # Change Log
 
-## [0.0.0] - 2024-08-26
+## !Deploy
 
-* Initial commit
+* Added `Get-CafResourceName`, generating Azure resource names from their real ARM resource type (e.g. `Microsoft.Compute/virtualMachines`) using the Cloud Adoption Framework recommended abbreviation, with optional zero-padded instance number and random-character (`-RandomSuffixLength`, always lowercase) suffixes for instance differentiation and globally-unique naming scenarios. Pass `-Seed` to make the random suffix reproducible, for idempotent name generation.
+* Added `Get-CafResourceType`, a local/offline lookup of the CAF naming rules (abbreviation, scope, length, casing) for a given resource type.
+* Added `Test-CafResourceName`, validating an existing name against a resource type's naming rules, returning a pass/fail breakdown, a plain-English `Reason` when invalid, or an overall `$true`/`$false` with `-Quiet`.
+* Added `New-CafResourceNamingConvention`, saving a reusable set of `-Prefix`/`-Suffix`/`-Separator`/`-InstanceNumberPadding`/`-RandomSuffixLength` defaults to a JSON file, so an organization's naming convention doesn't need to be retyped on every call - consumed by `Get-CafResourceName -ConventionPath`, with anything also specified explicitly still taking precedence.
+* Added `Export-CafResourceType`, writing the known resource types to a CSV or Markdown reference file (format chosen from `-Path`'s extension), for sharing outside PowerShell.
+* `Get-CafResourceName` accepts pipeline input by property name on all of its parameters, so a list of resource specs (e.g. from `Import-Csv`) can be batch-generated in one call. Added `-Verbose` tracing of the length-budget reasoning (reserved segments, trimming decisions) behind a result.
+* `-ResourceType` and `-Resource` match as a substring by default (falling back from an exact match), so the full ARM type doesn't need to be typed out. An `-Alias` parameter (aliased `-Slug`) is also available as a shorter alternative to `-ResourceType` on all cmdlets, including `Get-CafResourceType` itself (previously just `-Slug`). On `Get-CafResourceName`/`Test-CafResourceName`, `-Resource` can now also be used on its own to identify the resource - every friendly name in the data is unique, so e.g. `-Resource 'Key vault'` resolves without needing `-ResourceType`/`-Alias` at all; `-ResourceType` takes precedence if more than one of the three happens to be specified (e.g. by piping in an object with all three properties).
+* Tab completion for `-ResourceType`/`-Alias`/`-Resource` is registered in the module file itself rather than via the `[ArgumentCompleter(...)]` parameter attribute, since an attribute-scriptblock isn't bound to the module's session state and silently failed to see the module's private functions (falling back to file-path completion). The `-Resource` completer narrows its suggestions to whichever `-ResourceType`/`-Alias` has already been typed on the line.
+* Added `AzureCAF/resourceDefinition.json`, a curated data set of CAF naming rules keyed by ARM resource type, and `Build/Update-ResourceDefinition.ps1` to report on upstream changes to maintain it over time.
