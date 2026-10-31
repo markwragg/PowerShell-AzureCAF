@@ -83,7 +83,7 @@ Describe 'Export-CafResourceType' {
             $Path = Join-Path $TestDrive 'overwrite.csv'
             Export-CafResourceType -Path $Path
             { Get-CafResourceType -Alias 'kv' | Export-CafResourceType -Path $Path -Force -ErrorAction Stop } | Should -Not -Throw
-            (Import-Csv -Path $Path).Count | Should -Be 1
+            @(Import-Csv -Path $Path).Count | Should -Be 1
         }
 
         It 'Does not write the file when -WhatIf is specified' {
