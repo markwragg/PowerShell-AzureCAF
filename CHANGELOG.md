@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy
+## [0.0.1] - 2026-10-31
 
 * Added `Get-CafResourceName`, generating Azure resource names from their real ARM resource type (e.g. `Microsoft.Compute/virtualMachines`) using the Cloud Adoption Framework recommended abbreviation, with optional zero-padded instance number and random-character (`-RandomSuffixLength`, always lowercase) suffixes for instance differentiation and globally-unique naming scenarios. Pass `-Seed` to make the random suffix reproducible, for idempotent name generation.
 * Added `Get-CafResourceType`, a local/offline lookup of the CAF naming rules (abbreviation, scope, length, casing) for a given resource type.
