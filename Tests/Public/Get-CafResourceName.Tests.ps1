@@ -101,6 +101,92 @@ Describe 'Get-CafResourceName' {
         }
     }
 
+    Context 'Count' {
+
+        It 'Generates sequential instance numbers starting from 1 when -InstanceNumber is not specified' {
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Count 3
+            $Result | Should -HaveCount 3
+            $Result | Should -Be @('contoso-vm-001', 'contoso-vm-002', 'contoso-vm-003')
+        }
+
+        It 'Starts the sequence from -InstanceNumber when specified' {
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -InstanceNumber 5 -Count 3
+            $Result | Should -Be @('contoso-vm-005', 'contoso-vm-006', 'contoso-vm-007')
+        }
+
+        It 'Returns a single name when -Count is not specified' {
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' |
+                Should -Be 'contoso-vm'
+        }
+
+        It 'Gives each generated name its own random suffix' {
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -Count 3
+            $Result | Should -HaveCount 3
+            ($Result | Select-Object -Unique) | Should -HaveCount 3
+            $Result | ForEach-Object { $_ | Should -Match '^contosost\d{3}[a-z0-9]{4}$' }
+        }
+
+        It 'Produces the same sequence of random suffixes every time when -RandomSuffixSeed is specified' {
+            $First = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -Count 3 -RandomSuffixSeed 42
+            $Second = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -Count 3 -RandomSuffixSeed 42
+            $First | Should -Be $Second
+        }
+
+        It 'Reserves room for the longest instance number in the sequence so the base name stays consistent' {
+            $LongPrefix = 'a' * 30
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix $LongPrefix -Count 3 -WarningAction SilentlyContinue
+            $Result | Should -Be @('aaaaaaaaaaaaaaaaaaaaa001', 'aaaaaaaaaaaaaaaaaaaaa002', 'aaaaaaaaaaaaaaaaaaaaa003')
+            $Result | ForEach-Object { $_.Length | Should -Be 24 }
+        }
+    }
+
+    Context 'AsObject' {
+
+        It 'Returns a string by default' {
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso'
+            $Result | Should -BeOfType [string]
+        }
+
+        It 'Returns an object with Name, ResourceType, Resource and Slug when -AsObject is specified' {
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -AsObject
+            $Result.Name | Should -Be 'contoso-vm'
+            $Result.ResourceType | Should -Be 'Microsoft.Compute/virtualMachines'
+            $Result.Resource | Should -Be 'Virtual machine'
+            $Result.Slug | Should -Be 'vm'
+            $Result.InstanceNumber | Should -BeNullOrEmpty
+            $Result.RandomSuffix | Should -BeNullOrEmpty
+        }
+
+        It 'Includes InstanceNumber when -InstanceNumber is specified' {
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -InstanceNumber 1 -AsObject
+            $Result.Name | Should -Be 'contoso-vm-001'
+            $Result.InstanceNumber | Should -Be 1
+        }
+
+        It 'Includes a distinct InstanceNumber per generated name with -Count' {
+            $Results = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Count 3 -AsObject
+            $Results.InstanceNumber | Should -Be @(1, 2, 3)
+            $Results.Name | Should -Be @('contoso-vm-001', 'contoso-vm-002', 'contoso-vm-003')
+        }
+
+        It 'Includes RandomSuffix when -RandomSuffixLength is specified' {
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -AsObject
+            $Result.RandomSuffix | Should -Match '^[a-z0-9]{4}$'
+            $Result.Name | Should -Be "contosost$($Result.RandomSuffix)"
+        }
+
+        It 'Keeps each row traceable when batch-generating across different resource types' {
+            $Items = @(
+                [pscustomobject]@{ ResourceType = 'Microsoft.Compute/virtualMachines'; Prefix = 'contoso' }
+                [pscustomobject]@{ Alias = 'kv'; Prefix = 'contoso' }
+            )
+
+            $Results = $Items | Get-CafResourceName -AsObject
+            $Results[0].ResourceType | Should -Be 'Microsoft.Compute/virtualMachines'
+            $Results[1].ResourceType | Should -Be 'Microsoft.KeyVault/vaults'
+        }
+    }
+
     Context 'Random suffix' {
 
         It 'Appends the requested number of random characters' {
@@ -118,7 +204,7 @@ Describe 'Get-CafResourceName' {
         It 'Is always lowercase, even for a resource type that otherwise allows uppercase' {
             # Microsoft.Compute/virtualMachines has Lowercase = false, but the random suffix is for
             # uniqueness, not communication, so it's kept lowercase-only regardless.
-            $Result = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -RandomSuffixLength 8 -Seed 1
+            $Result = Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 1
             $Result | Should -Match '^contoso-vm-[a-z0-9]{8}$'
         }
 
@@ -129,20 +215,20 @@ Describe 'Get-CafResourceName' {
                 Should -Throw
         }
 
-        It 'Produces the same random suffix every time when -Seed is specified' {
-            $First = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -Seed 42
-            $Second = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -Seed 42
+        It 'Produces the same random suffix every time when -RandomSuffixSeed is specified' {
+            $First = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 42
+            $Second = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 42
             $First | Should -Be $Second
         }
 
         It 'Produces different random suffixes for different seeds' {
-            $First = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -Seed 1
-            $Second = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -Seed 2
+            $First = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 1
+            $Second = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 2
             $First | Should -Not -Be $Second
         }
 
-        It 'Ignores -Seed when -RandomSuffixLength is not specified' {
-            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Seed 42 |
+        It 'Ignores -RandomSuffixSeed when -RandomSuffixLength is not specified' {
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -RandomSuffixSeed 42 |
                 Should -Be 'contoso-vm'
         }
     }
@@ -260,16 +346,16 @@ Describe 'Get-CafResourceName' {
             $Results[1] | Should -Be 'contoso-kv'
         }
 
-        It 'Binds InstanceNumber, RandomSuffixLength and Seed by property name' {
+        It 'Binds InstanceNumber, RandomSuffixLength and RandomSuffixSeed by property name' {
             $Item = [pscustomobject]@{
                 ResourceType       = 'Microsoft.Storage/storageAccounts'
                 Prefix             = 'contoso'
                 RandomSuffixLength = 4
-                Seed               = 42
+                RandomSuffixSeed   = 42
             }
 
             $Result = $Item | Get-CafResourceName
-            $DirectResult = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -Seed 42
+            $DirectResult = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -RandomSuffixSeed 42
             $Result | Should -Be $DirectResult
         }
     }
@@ -288,12 +374,12 @@ Describe 'Get-CafResourceName' {
         It 'Applies every default from the convention file when nothing is specified explicitly' {
             # Prefix, InstanceNumberPadding (2, not the default 3) and RandomSuffixLength (4) all come
             # from the convention file here - only -InstanceNumber itself is passed explicitly.
-            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath $ConventionPath -InstanceNumber 1 -Seed 1 |
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath $ConventionPath -InstanceNumber 1 -RandomSuffixSeed 1 |
                 Should -Be 'contoso-prod-vm-01-idq1'
         }
 
         It 'Lets an explicit parameter override the convention file' {
-            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'fabrikam' -ConventionPath $ConventionPath -InstanceNumber 1 -Seed 1 |
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'fabrikam' -ConventionPath $ConventionPath -InstanceNumber 1 -RandomSuffixSeed 1 |
                 Should -Be 'fabrikam-vm-01-idq1'
         }
 
@@ -313,7 +399,7 @@ Describe 'Get-CafResourceName' {
     Context '-Verbose trace' {
 
         It 'Emits verbose output describing the length budget without affecting the result' {
-            $VerboseOutput = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -Seed 1 -Verbose 4>&1
+            $VerboseOutput = Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 4 -RandomSuffixSeed 1 -Verbose 4>&1
             $Result = $VerboseOutput | Where-Object { $_ -isnot [System.Management.Automation.VerboseRecord] }
             $Verbose = $VerboseOutput | Where-Object { $_ -is [System.Management.Automation.VerboseRecord] }
 

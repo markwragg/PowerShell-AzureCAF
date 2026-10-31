@@ -1,5 +1,11 @@
 # Change Log
 
+## !Deploy 0.1.0
+
+* [Breaking] `Get-CafResourceName` `-Seed` parameter has been renamed to `-ResourceSuffixSeed`.
+* `Get-CafResourceName` supports `-Count` to generate several sequential instance numbers in one call (e.g. `-Count 3` produces `-001`, `-002`, `-003`), starting from `-InstanceNumber` if specified, otherwise `1`. Each generated name gets its own random suffix when `-RandomSuffixLength` is also used.
+* `Get-CafResourceName` supports `-AsObject`, returning a `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object instead of a bare string - useful for telling results apart when batch-generating across resource types and/or `-Count`, or for exporting alongside the values that produced each name.
+
 ## [0.0.1] - 2026-10-31
 
 * Added `Get-CafResourceName`, generating Azure resource names from their real ARM resource type (e.g. `Microsoft.Compute/virtualMachines`) using the Cloud Adoption Framework recommended abbreviation, with optional zero-padded instance number and random-character (`-RandomSuffixLength`, always lowercase) suffixes for instance differentiation and globally-unique naming scenarios. Pass `-Seed` to make the random suffix reproducible, for idempotent name generation.

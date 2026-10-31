@@ -46,10 +46,21 @@ Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix cont
 contosostabcdef
 ```
 
-Pass `-Seed` when you need the random suffix to be reproducible - e.g. so repeated deployments of the same resource land on the same name:
+Pass `-RandomSuffixSeed` when you need the random suffix to be reproducible - e.g. so repeated deployments of the same resource land on the same name:
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -Seed 42
+Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
+```
+
+`-Count` generates several sequential instance numbers in one call, starting from `-InstanceNumber` if specified, otherwise `1`:
+
+```powershell
+Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
+```
+```text
+contoso-prod-vm-001
+contoso-prod-vm-002
+contoso-prod-vm-003
 ```
 
 The [naming components guide](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming#choose-naming-components) also calls out workload/application, environment and region as useful naming components - CAF deliberately leaves their order up to you, so just include them in `-Prefix`/`-Suffix` in whichever order your organization has standardized on, e.g. `-Prefix workload1, prod, eastus2`.
@@ -85,6 +96,12 @@ contoso-kv
 
 ```powershell
 Import-Csv ./resources.csv | Get-CafResourceName
+```
+
+Batch-generating like this returns bare strings, which lose track of which input row (or which `-Count` iteration) produced which name. Add `-AsObject` to get back `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` instead - handy for exporting alongside the values that produced each name:
+
+```powershell
+Import-Csv ./resources.csv | Get-CafResourceName -AsObject | Export-Csv ./generated-names.csv
 ```
 
 Add `-Verbose` to see the length-budget reasoning behind a result (reserved segments, trimming decisions):

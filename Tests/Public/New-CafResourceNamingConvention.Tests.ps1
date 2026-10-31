@@ -25,7 +25,7 @@ Describe 'New-CafResourceNamingConvention' {
         $Path = Join-Path $TestDrive 'roundtrip.json'
         New-CafResourceNamingConvention -Path $Path -Prefix 'contoso' -RandomSuffixLength 4
 
-        Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath $Path -Seed 1 |
+        Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath $Path -RandomSuffixSeed 1 |
             Should -Be 'contoso-vm-idq1'
     }
 

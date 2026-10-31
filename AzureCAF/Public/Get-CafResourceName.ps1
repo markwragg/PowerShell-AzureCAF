@@ -55,6 +55,12 @@ function Get-CafResourceName {
         The minimum number of digits to zero-pad -InstanceNumber to, e.g. the default of 3 formats '1'
         as '001'. A number that's already at least this many digits long is left as-is. Ignored unless
         -InstanceNumber is specified. Falls back to -ConventionPath's value if not specified.
+    .PARAMETER Count
+        Generates this many names in one call, with sequential instance numbers, instead of just one.
+        Starts from -InstanceNumber if specified (e.g. -InstanceNumber 5 -Count 3 produces 005, 006, 007),
+        or from 1 otherwise. Implies an instance number even if -InstanceNumber isn't specified, since
+        otherwise every generated name would be identical. Each generated name gets its own random
+        suffix if -RandomSuffixLength is also specified.
     .PARAMETER RandomSuffixLength
         Appends this many random lowercase alphanumeric characters to the end of the name, for
         scenarios that require a globally unique name (such as a storage account or key vault). Always
@@ -62,7 +68,7 @@ function Get-CafResourceName {
         uniqueness, not communication, and doesn't need the extra entropy. The characters are reserved
         out of the resource type's maximum length before the rest of the name is trimmed, so the random
         suffix is never cut short. Falls back to -ConventionPath's value if not specified.
-    .PARAMETER Seed
+    .PARAMETER RandomSuffixSeed
         Seeds the random number generator used by -RandomSuffixLength, so the same seed (with the same
         other parameters) always produces the same random characters - useful if you need to generate
         the same name idempotently, e.g. across repeated deployments. Ignored unless -RandomSuffixLength
@@ -77,6 +83,12 @@ function Get-CafResourceName {
         By default, characters that aren't valid for the given resource type are stripped from -Prefix
         and -Suffix before the name is built. Specify -NoClean to pass them through unmodified instead
         (the generated name will then fail validation if it contains invalid characters).
+    .PARAMETER AsObject
+        Returns an object with Name, ResourceType, Resource, Slug, InstanceNumber and RandomSuffix
+        properties instead of just the name string - useful for telling generated names apart when
+        batch-generating across different resource types and/or -Count, or for exporting the result
+        (e.g. to CSV) alongside the values that produced it. InstanceNumber/RandomSuffix are $null when
+        -InstanceNumber/-Count or -RandomSuffixLength weren't in play for that name.
     .EXAMPLE
         Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Suffix 01
 
@@ -103,12 +115,16 @@ function Get-CafResourceName {
         Generates 'contoso-prod-vm-001' - -InstanceNumber is zero-padded to 3 digits by default, matching
         the Cloud Adoption Framework's own example names such as 'vm-sql-test-001'.
     .EXAMPLE
+        Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
+
+        Generates 'contoso-prod-vm-001', 'contoso-prod-vm-002' and 'contoso-prod-vm-003' in one call.
+    .EXAMPLE
         Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
 
         Generates a storage account name such as 'contosostabcdef', with 6 random characters appended to
         help ensure the globally-unique name doesn't collide with one that already exists.
     .EXAMPLE
-        Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -Seed 42
+        Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
 
         Generates the same storage account name every time it's run, since the random suffix is seeded.
     .EXAMPLE
@@ -131,6 +147,12 @@ function Get-CafResourceName {
 
         Batch-generates a name for every row of resources.csv, which needs at least a ResourceType or
         Alias column, and may also have Resource/Prefix/Suffix/Separator/InstanceNumber columns.
+    .EXAMPLE
+        Import-Csv ./resources.csv | Get-CafResourceName -AsObject | Export-Csv ./generated-names.csv
+
+        -AsObject keeps the ResourceType/Resource/Slug/InstanceNumber/RandomSuffix that produced each
+        name alongside it, rather than returning bare strings that lose track of which input row (or
+        which -Count iteration) each one came from.
     .LINK
         https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
     #>
@@ -175,20 +197,29 @@ function Get-CafResourceName {
         $InstanceNumberPadding = 3,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 1000)]
+        [int]
+        $Count = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0, 24)]
         [int]
         $RandomSuffixLength = 0,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [int]
-        $Seed,
+        $RandomSuffixSeed,
 
         [string]
         $ConventionPath,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [switch]
-        $NoClean
+        $NoClean,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $AsObject
     )
 
     begin {
@@ -281,8 +312,13 @@ function Get-CafResourceName {
 
         $ActualSeparator = if ($definition.Dashes) { $EffectiveSeparator } else { '' }
 
-        $HasInstanceNumber = $PSBoundParameters.ContainsKey('InstanceNumber')
-        $InstanceSegment = if ($HasInstanceNumber) { $InstanceNumber.ToString().PadLeft($EffectiveInstanceNumberPadding, '0') } else { $null }
+        $HasInstanceNumber = $PSBoundParameters.ContainsKey('InstanceNumber') -or $Count -gt 1
+        $StartInstanceNumber = if ($PSBoundParameters.ContainsKey('InstanceNumber')) { $InstanceNumber } else { 1 }
+        $EndInstanceNumber = $StartInstanceNumber + $Count - 1
+
+        # Reserve space based on the longest instance number in the sequence, so the trimmed base name
+        # (prefix/slug/suffix) is the same length for every generated name, not just the first one.
+        $InstanceSegment = if ($HasInstanceNumber) { $EndInstanceNumber.ToString().PadLeft($EffectiveInstanceNumberPadding, '0') } else { $null }
 
         $reservedLength = 0
         $reservedDescriptions = @()
@@ -324,34 +360,58 @@ function Get-CafResourceName {
             Write-Verbose "Trimmed from $beforeTrimLength to $mainBudget characters -> '$resourceName'."
         }
 
-        if ($InstanceSegment) {
-            $resourceName = $resourceName + $ActualSeparator + $InstanceSegment
-            Write-Verbose "Appended instance segment '$InstanceSegment' -> '$resourceName'."
-        }
-
-        if ($EffectiveRandomSuffixLength -gt 0) {
-            # Always lowercase alphanumeric, even for resource types that allow uppercase - the
-            # random suffix exists for uniqueness, not communication, and 36^RandomSuffixLength is
-            # already far more entropy than a uniqueness suffix needs.
-            $CharPool = 'abcdefghijklmnopqrstuvwxyz0123456789'
-            $Random = if ($PSBoundParameters.ContainsKey('Seed')) { [System.Random]::new($Seed) } else { [System.Random]::new() }
-            $RandomSuffix = -join (1..$EffectiveRandomSuffixLength | ForEach-Object { $CharPool[$Random.Next($CharPool.Length)] })
-            $resourceName = $resourceName + $ActualSeparator + $RandomSuffix
-            Write-Verbose "Appended random suffix '$RandomSuffix' -> '$resourceName'."
-        }
-
-        if ($definition.Lowercase -and $resourceName -cmatch '[A-Z]') {
-            $resourceName = $resourceName.ToLower()
-            Write-Warning 'Resource name has been converted to lower case due to naming requirement.'
-            Write-Verbose "Converted to lowercase -> '$resourceName'."
-        }
-
-        if ($resourceName -notmatch $definition.ValidationRegex) {
-            Write-Error "The generated name '$resourceName' is not valid for $($definition.ResourceType) (pattern: $($definition.ValidationRegex))."
+        # A single shared Random, created once per pipeline item rather than per generated name, so a
+        # -RandomSuffixSeed produces a reproducible sequence of distinct suffixes across the whole -Count batch.
+        $Random = if ($EffectiveRandomSuffixLength -gt 0) {
+            if ($PSBoundParameters.ContainsKey('RandomSuffixSeed')) { [System.Random]::new($RandomSuffixSeed) } else { [System.Random]::new() }
         }
         else {
-            Write-Verbose "Final result: '$resourceName'."
-            return $resourceName
+            $null
+        }
+        $CharPool = 'abcdefghijklmnopqrstuvwxyz0123456789'
+
+        for ($InstanceCounter = $StartInstanceNumber; $InstanceCounter -le $EndInstanceNumber; $InstanceCounter++) {
+            $FinalName = $resourceName
+
+            if ($HasInstanceNumber) {
+                $CurrentInstanceSegment = $InstanceCounter.ToString().PadLeft($EffectiveInstanceNumberPadding, '0')
+                $FinalName = $FinalName + $ActualSeparator + $CurrentInstanceSegment
+                Write-Verbose "Appended instance segment '$CurrentInstanceSegment' -> '$FinalName'."
+            }
+
+            if ($EffectiveRandomSuffixLength -gt 0) {
+                # Always lowercase alphanumeric, even for resource types that allow uppercase - the
+                # random suffix exists for uniqueness, not communication, and 36^RandomSuffixLength is
+                # already far more entropy than a uniqueness suffix needs.
+                $RandomSuffix = -join (1..$EffectiveRandomSuffixLength | ForEach-Object { $CharPool[$Random.Next($CharPool.Length)] })
+                $FinalName = $FinalName + $ActualSeparator + $RandomSuffix
+                Write-Verbose "Appended random suffix '$RandomSuffix' -> '$FinalName'."
+            }
+
+            if ($definition.Lowercase -and $FinalName -cmatch '[A-Z]') {
+                $FinalName = $FinalName.ToLower()
+                Write-Warning 'Resource name has been converted to lower case due to naming requirement.'
+                Write-Verbose "Converted to lowercase -> '$FinalName'."
+            }
+
+            if ($FinalName -notmatch $definition.ValidationRegex) {
+                Write-Error "The generated name '$FinalName' is not valid for $($definition.ResourceType) (pattern: $($definition.ValidationRegex))."
+            }
+            elseif ($AsObject) {
+                Write-Verbose "Final result: '$FinalName'."
+                [pscustomobject]@{
+                    Name           = $FinalName
+                    ResourceType   = $definition.ResourceType
+                    Resource       = $definition.Resource
+                    Slug           = $definition.Slug
+                    InstanceNumber = if ($HasInstanceNumber) { $InstanceCounter } else { $null }
+                    RandomSuffix   = if ($EffectiveRandomSuffixLength -gt 0) { $RandomSuffix } else { $null }
+                }
+            }
+            else {
+                Write-Verbose "Final result: '$FinalName'."
+                $FinalName
+            }
         }
     }
 }
