@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.1.0
+## [0.1.0] - 2026-10-31
 
 * [Breaking] `Get-CafResourceName` `-Seed` parameter has been renamed to `-ResourceSuffixSeed`.
 * `Get-CafResourceName` supports `-Count` to generate several sequential instance numbers in one call (e.g. `-Count 3` produces `-001`, `-002`, `-003`), starting from `-InstanceNumber` if specified, otherwise `1`. Each generated name gets its own random suffix when `-RandomSuffixLength` is also used.

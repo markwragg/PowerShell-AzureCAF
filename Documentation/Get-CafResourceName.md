@@ -8,8 +8,8 @@ Generates an Azure resource name that follows the Cloud Adoption Framework namin
 ```
 Get-CafResourceName [[-ResourceType] <String>] [-Alias <String>] [-Resource <String>] [-Prefix <String[]>]
  [-Suffix <String[]>] [-Separator <String>] [-InstanceNumber <Int32>] [-InstanceNumberPadding <Int32>]
- [-RandomSuffixLength <Int32>] [-Seed <Int32>] [-ConventionPath <String>] [-NoClean]
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-Count <Int32>] [-RandomSuffixLength <Int32>] [-RandomSuffixSeed <Int32>] [-ConventionPath <String>]
+ [-NoClean] [-AsObject] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -74,20 +74,27 @@ the Cloud Adoption Framework's own example names such as 'vm-sql-test-001'.
 
 ### EXAMPLE 6
 ```
+Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
+```
+
+Generates 'contoso-prod-vm-001', 'contoso-prod-vm-002' and 'contoso-prod-vm-003' in one call.
+
+### EXAMPLE 7
+```
 Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
 ```
 
 Generates a storage account name such as 'contosostabcdef', with 6 random characters appended to
 help ensure the globally-unique name doesn't collide with one that already exists.
 
-### EXAMPLE 7
+### EXAMPLE 8
 ```
-Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -Seed 42
+Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
 ```
 
 Generates the same storage account name every time it's run, since the random suffix is seeded.
 
-### EXAMPLE 8
+### EXAMPLE 9
 ```
 Get-CafResourceName -ResourceType Microsoft.Web/sites -Resource 'Function app' -Prefix contoso, prod
 ```
@@ -96,7 +103,7 @@ Generates a function app name.
 -Resource is required here because 'Microsoft.Web/sites' is also
 used for web apps, which use a different abbreviation.
 
-### EXAMPLE 9
+### EXAMPLE 10
 ```
 Get-CafResourceType -Slug kv | Get-CafResourceName -Prefix contoso -RandomSuffixLength 4
 ```
@@ -104,7 +111,7 @@ Get-CafResourceType -Slug kv | Get-CafResourceName -Prefix contoso -RandomSuffix
 Pipes the resource type definition for the 'kv' (Key Vault) abbreviation straight into
 Get-CafResourceName.
 
-### EXAMPLE 10
+### EXAMPLE 11
 ```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso -ConventionPath ./contoso.json
 ```
@@ -113,13 +120,22 @@ Uses -Prefix explicitly, but falls back to whatever -Suffix/-Separator/etc.
 are saved in
 contoso.json (see New-CafResourceNamingConvention) for anything not specified here.
 
-### EXAMPLE 11
+### EXAMPLE 12
 ```
 Import-Csv ./resources.csv | Get-CafResourceName
 ```
 
 Batch-generates a name for every row of resources.csv, which needs at least a ResourceType or
 Alias column, and may also have Resource/Prefix/Suffix/Separator/InstanceNumber columns.
+
+### EXAMPLE 13
+```
+Import-Csv ./resources.csv | Get-CafResourceName -AsObject | Export-Csv ./generated-names.csv
+```
+
+-AsObject keeps the ResourceType/Resource/Slug/InstanceNumber/RandomSuffix that produced each
+name alongside it, rather than returning bare strings that lose track of which input row (or
+which -Count iteration) each one came from.
 
 ## PARAMETERS
 
@@ -288,6 +304,28 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
+### -Count
+Generates this many names in one call, with sequential instance numbers, instead of just one.
+Starts from -InstanceNumber if specified (e.g.
+-InstanceNumber 5 -Count 3 produces 005, 006, 007),
+or from 1 otherwise.
+Implies an instance number even if -InstanceNumber isn't specified, since
+otherwise every generated name would be identical.
+Each generated name gets its own random
+suffix if -RandomSuffixLength is also specified.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: 1
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
 ### -RandomSuffixLength
 Appends this many random lowercase alphanumeric characters to the end of the name, for
 scenarios that require a globally unique name (such as a storage account or key vault).
@@ -311,7 +349,7 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -Seed
+### -RandomSuffixSeed
 Seeds the random number generator used by -RandomSuffixLength, so the same seed (with the same
 other parameters) always produces the same random characters - useful if you need to generate
 the same name idempotently, e.g.
@@ -356,6 +394,27 @@ By default, characters that aren't valid for the given resource type are strippe
 and -Suffix before the name is built.
 Specify -NoClean to pass them through unmodified instead
 (the generated name will then fail validation if it contains invalid characters).
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -AsObject
+Returns an object with Name, ResourceType, Resource, Slug, InstanceNumber and RandomSuffix
+properties instead of just the name string - useful for telling generated names apart when
+batch-generating across different resource types and/or -Count, or for exporting the result
+(e.g.
+to CSV) alongside the values that produced it.
+InstanceNumber/RandomSuffix are $null when
+-InstanceNumber/-Count or -RandomSuffixLength weren't in play for that name.
 
 ```yaml
 Type: SwitchParameter
