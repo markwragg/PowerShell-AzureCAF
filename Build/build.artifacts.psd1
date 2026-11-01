@@ -5,5 +5,6 @@
 @{
     ModuleFiles = @(
         'resourceDefinition.json'
+        'regionDefinition.json'
     )
 }

@@ -1,5 +1,11 @@
 # Change Log
 
+## !Deploy 0.2.0
+
+* Added a `-Region` parameter to `Get-CafResourceName` to add a region short-code after the suffix, based on specifying the full region name or display name.
+* Added `Get-CafRegion`, a local/offline lookup of the abbreviation `Get-CafResourceName`'s new `-Region` parameter resolves an Azure region to (e.g. `eastus` -> `eus`, appended after any `-Suffix`), covering 77 regions.
+* Expanded `resourceDefinition.json` from 127 to 239 resource types, adding coverage for services such as Azure Cache for Redis, Azure NetApp Files, Azure AI Foundry/Cognitive Services kind variants, load balancers, private endpoints, DNS zones, backup vaults, and the Operator Nexus (`NetworkCloud/*`) family.
+
 ## [0.1.0] - 2026-10-31
 
 * [Breaking] `Get-CafResourceName` `-Seed` parameter has been renamed to `-ResourceSuffixSeed`.

@@ -63,7 +63,16 @@ contoso-prod-vm-002
 contoso-prod-vm-003
 ```
 
-The [naming components guide](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming#choose-naming-components) also calls out workload/application, environment and region as useful naming components - CAF deliberately leaves their order up to you, so just include them in `-Prefix`/`-Suffix` in whichever order your organization has standardized on, e.g. `-Prefix workload1, prod, eastus2`.
+The [naming components guide](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming#choose-naming-components) also calls out workload/application, environment and region as useful naming components - CAF deliberately leaves their order up to you, so just include workload/environment in `-Prefix`/`-Suffix` in whichever order your organization has standardized on, e.g. `-Prefix workload1, prod`.
+
+`-Region` resolves an Azure region to its abbreviation the same way `-ResourceType` resolves to its slug (e.g. `eastus` -> `eus`), and appends it after any `-Suffix`:
+
+```powershell
+Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
+```
+```text
+contoso-prod-vm-eus
+```
 
 Some ARM resource types cover more than one kind of resource with different abbreviations (for example `Microsoft.Web/sites` is used by both a "Web app" and a "Function app"). When that happens, `Get-CafResourceName` tells you which `-Resource` values to choose between:
 
@@ -186,6 +195,15 @@ Export-CafResourceType -Path ./resource-types.md
 Get-CafResourceType -ResourceType *storage* | Export-CafResourceType -Path ./storage-types.csv
 ```
 
+### Discover regions
+
+`Get-CafRegion` is the same kind of local, offline lookup as `Get-CafResourceType`, but for the region abbreviations `-Region` resolves to:
+
+```powershell
+Get-CafRegion -Region eastus
+Get-CafRegion -Region 'West Europe'
+```
+
 ## Data source and maintenance
 
 `AzureCAF/resourceDefinition.json` is a static, curated data set keyed by real ARM resource type (e.g. `Microsoft.Compute/virtualMachines`), built by joining:
@@ -200,3 +218,5 @@ As Azure adds resource types, run [`Build/Update-ResourceDefinition.ps1`](Build/
 ```
 
 It re-scrapes the CAF abbreviations guide and reports resource types that are new, removed, or have changed slug since `resourceDefinition.json` was last updated - splitting new entries into ones where naming-rule data can be copied from an existing entry with the same abbreviation, versus ones that need a naming rule looked up by hand from the [naming rules and restrictions guide](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules) (deliberately not auto-parsed - that page is free-text prose, and generating a wrong validation regex is worse than flagging a gap). It never modifies `resourceDefinition.json` itself; review the report and update the file by hand. Pass `-CompareAzResourceProvider` to additionally cross-check against `Get-AzResourceProvider -ListAvailable` for ARM types Azure now has that aren't in the CAF guide yet (requires `Az.Resources` and `Connect-AzAccount`).
+
+`AzureCAF/regionDefinition.json` is a similar static data set for region abbreviations, sourced from [jlaundry.nz's Azure region abbreviations](https://www.jlaundry.nz/2022/azure_region_abbreviations/) rather than an official Microsoft source - Microsoft doesn't publish a complete abbreviation for every region. Region names/existence are cross-checked against Microsoft's official [list of Azure regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list); a handful of entries that jlaundry's list carried but don't appear there (`Brazil US`, the retired classic `Germany Central`/`Germany Northeast`, `Jio India Central`/`Jio India West`, `Malaysia South`, `Sweden South`) were dropped, and regions missing an abbreviation from either source (`India South Central`, `Southeast Asia 3`, `Taiwan North`) got one coined by hand, following the style of neighbouring entries. There's no scraper for it; update the file by hand as new regions launch.

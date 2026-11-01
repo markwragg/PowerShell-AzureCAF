@@ -1,5 +1,6 @@
 $Script:ModuleRoot = $PSScriptRoot
 $Script:ResourceDefinitionPath = Join-Path $PSScriptRoot 'resourceDefinition.json'
+$Script:RegionDefinitionPath = Join-Path $PSScriptRoot 'regionDefinition.json'
 
 $Public = @( Get-ChildItem -Path "$PSScriptRoot\Public\*.ps1" -Recurse )
 $Private = @( Get-ChildItem -Path "$PSScriptRoot\Private\*.ps1" -Recurse )
@@ -70,6 +71,20 @@ $ResourceCompleter = {
         }
 }
 
+$RegionCompleter = {
+    param($CommandName, $ParameterName, $WordToComplete, $CommandAst, $FakeBoundParameters)
+    $null = $CommandName, $ParameterName, $CommandAst, $FakeBoundParameters
+    # Matches against both the ARM region name and its display name, same as Resolve-CafRegion, so
+    # typing either 'east' or 'East US' offers a completion - but always completes to the ARM name,
+    # since that's the unambiguous value every other Azure PowerShell -Location parameter expects.
+    $Pattern = Get-CafWildcardPattern -Value $WordToComplete
+    (Get-CafRegionDefinition) |
+        Where-Object { $_.Region -like $Pattern -or $_.DisplayName -like $Pattern } |
+        Sort-Object -Property Region -Unique |
+        ForEach-Object { [System.Management.Automation.CompletionResult]::new($_.Region, "$($_.Region) ($($_.DisplayName))", 'ParameterValue', $_.DisplayName) }
+}
+
 Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'ResourceType' -ScriptBlock $ResourceTypeCompleter
 Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Alias' -ScriptBlock $SlugCompleter
 Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Resource' -ScriptBlock $ResourceCompleter
+Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Get-CafRegion' -ParameterName 'Region' -ScriptBlock $RegionCompleter

@@ -70,6 +70,25 @@ Describe 'Argument completers' {
         }
     }
 
+    Context 'Get-CafResourceName -Region' {
+
+        It 'Offers every known region when nothing has been typed yet' {
+            $Matches = Complete-Line "Get-CafResourceName -Region "
+            $Matches.Count | Should -BeGreaterThan 50
+        }
+
+        It 'Matches the ARM region name as a substring' {
+            $Matches = Complete-Line "Get-CafResourceName -Region eastus"
+            $Matches.CompletionText | Should -Contain 'eastus'
+            $Matches.CompletionText | Should -Contain 'eastus2'
+        }
+
+        It 'Shows the display name alongside the completion text' {
+            $Matches = Complete-Line "Get-CafResourceName -Region eastus2euap"
+            ($Matches | Where-Object CompletionText -eq 'eastus2euap').ListItemText | Should -Be 'eastus2euap (East US 2 EUAP)'
+        }
+    }
+
     Context 'Get-CafResourceType' {
 
         It 'Completes -ResourceType' {

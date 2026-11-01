@@ -32,6 +32,29 @@ Describe 'Get-CafResourceName' {
         }
     }
 
+    Context 'Region' {
+
+        It 'Resolves a region to its abbreviation and appends it after any suffix' {
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Suffix '01' -Region 'eastus' |
+                Should -Be 'contoso-vm-01-eus'
+        }
+
+        It 'Resolves a region given by display name' {
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'East US' |
+                Should -Be 'contoso-vm-eus'
+        }
+
+        It 'Works with no explicit -Suffix' {
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'eastus' |
+                Should -Be 'contoso-vm-eus'
+        }
+
+        It 'Errors rather than silently dropping an unrecognized region' {
+            { Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'doesnotexist' -ErrorAction Stop } |
+                Should -Throw
+        }
+    }
+
     Context 'Cleaning invalid characters' {
 
         It 'Strips characters that are not valid for the resource type by default' {

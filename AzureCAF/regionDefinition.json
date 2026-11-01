@@ -1,0 +1,387 @@
+[
+  {
+    "Region": "australiacentral",
+    "DisplayName": "Australia Central",
+    "Slug": "acl"
+  },
+  {
+    "Region": "australiacentral2",
+    "DisplayName": "Australia Central 2",
+    "Slug": "acl2"
+  },
+  {
+    "Region": "australiaeast",
+    "DisplayName": "Australia East",
+    "Slug": "ae"
+  },
+  {
+    "Region": "australiasoutheast",
+    "DisplayName": "Australia Southeast",
+    "Slug": "ase"
+  },
+  {
+    "Region": "austriaeast",
+    "DisplayName": "Austria East",
+    "Slug": "aue"
+  },
+  {
+    "Region": "belgiumcentral",
+    "DisplayName": "Belgium Central",
+    "Slug": "bec"
+  },
+  {
+    "Region": "brazilsouth",
+    "DisplayName": "Brazil South",
+    "Slug": "brs"
+  },
+  {
+    "Region": "brazilsoutheast",
+    "DisplayName": "Brazil Southeast",
+    "Slug": "bse"
+  },
+  {
+    "Region": "canadacentral",
+    "DisplayName": "Canada Central",
+    "Slug": "cnc"
+  },
+  {
+    "Region": "canadaeast",
+    "DisplayName": "Canada East",
+    "Slug": "cne"
+  },
+  {
+    "Region": "centralindia",
+    "DisplayName": "Central India",
+    "Slug": "inc"
+  },
+  {
+    "Region": "centralus",
+    "DisplayName": "Central US",
+    "Slug": "cus"
+  },
+  {
+    "Region": "centraluseuap",
+    "DisplayName": "Central US EUAP",
+    "Slug": "ccy"
+  },
+  {
+    "Region": "chilecentral",
+    "DisplayName": "Chile Central",
+    "Slug": "clc"
+  },
+  {
+    "Region": "chinaeast",
+    "DisplayName": "China East",
+    "Slug": "sha"
+  },
+  {
+    "Region": "chinaeast2",
+    "DisplayName": "China East 2",
+    "Slug": "sha2"
+  },
+  {
+    "Region": "chinaeast3",
+    "DisplayName": "China East 3",
+    "Slug": "sha3"
+  },
+  {
+    "Region": "chinanorth",
+    "DisplayName": "China North",
+    "Slug": "bjb"
+  },
+  {
+    "Region": "chinanorth2",
+    "DisplayName": "China North 2",
+    "Slug": "bjb2"
+  },
+  {
+    "Region": "chinanorth3",
+    "DisplayName": "China North 3",
+    "Slug": "bjb3"
+  },
+  {
+    "Region": "denmarkeast",
+    "DisplayName": "Denmark East",
+    "Slug": "dke"
+  },
+  {
+    "Region": "eastasia",
+    "DisplayName": "East Asia",
+    "Slug": "ea"
+  },
+  {
+    "Region": "eastus",
+    "DisplayName": "East US",
+    "Slug": "eus"
+  },
+  {
+    "Region": "eastus2",
+    "DisplayName": "East US 2",
+    "Slug": "eus2"
+  },
+  {
+    "Region": "eastus2euap",
+    "DisplayName": "East US 2 EUAP",
+    "Slug": "ecy"
+  },
+  {
+    "Region": "francecentral",
+    "DisplayName": "France Central",
+    "Slug": "frc"
+  },
+  {
+    "Region": "francesouth",
+    "DisplayName": "France South",
+    "Slug": "frs"
+  },
+  {
+    "Region": "germanynorth",
+    "DisplayName": "Germany North",
+    "Slug": "gn"
+  },
+  {
+    "Region": "germanywestcentral",
+    "DisplayName": "Germany West Central",
+    "Slug": "gwc"
+  },
+  {
+    "Region": "indiasouthcentral",
+    "DisplayName": "India South Central",
+    "Slug": "insc"
+  },
+  {
+    "Region": "indonesiacentral",
+    "DisplayName": "Indonesia Central",
+    "Slug": "idc"
+  },
+  {
+    "Region": "israelcentral",
+    "DisplayName": "Israel Central",
+    "Slug": "ilc"
+  },
+  {
+    "Region": "italynorth",
+    "DisplayName": "Italy North",
+    "Slug": "itn"
+  },
+  {
+    "Region": "japaneast",
+    "DisplayName": "Japan East",
+    "Slug": "jpe"
+  },
+  {
+    "Region": "japanwest",
+    "DisplayName": "Japan West",
+    "Slug": "jpw"
+  },
+  {
+    "Region": "koreacentral",
+    "DisplayName": "Korea Central",
+    "Slug": "krc"
+  },
+  {
+    "Region": "koreasouth",
+    "DisplayName": "Korea South",
+    "Slug": "krs"
+  },
+  {
+    "Region": "malaysiawest",
+    "DisplayName": "Malaysia West",
+    "Slug": "myw"
+  },
+  {
+    "Region": "mexicocentral",
+    "DisplayName": "Mexico Central",
+    "Slug": "mxc"
+  },
+  {
+    "Region": "newzealandnorth",
+    "DisplayName": "New Zealand North",
+    "Slug": "nzn"
+  },
+  {
+    "Region": "northcentralus",
+    "DisplayName": "North Central US",
+    "Slug": "ncus"
+  },
+  {
+    "Region": "northeurope",
+    "DisplayName": "North Europe",
+    "Slug": "ne"
+  },
+  {
+    "Region": "norwayeast",
+    "DisplayName": "Norway East",
+    "Slug": "nwe"
+  },
+  {
+    "Region": "norwaywest",
+    "DisplayName": "Norway West",
+    "Slug": "nww"
+  },
+  {
+    "Region": "polandcentral",
+    "DisplayName": "Poland Central",
+    "Slug": "plc"
+  },
+  {
+    "Region": "qatarcentral",
+    "DisplayName": "Qatar Central",
+    "Slug": "qac"
+  },
+  {
+    "Region": "southafricanorth",
+    "DisplayName": "South Africa North",
+    "Slug": "san"
+  },
+  {
+    "Region": "southafricawest",
+    "DisplayName": "South Africa West",
+    "Slug": "saw"
+  },
+  {
+    "Region": "southcentralus",
+    "DisplayName": "South Central US",
+    "Slug": "scus"
+  },
+  {
+    "Region": "southeastasia",
+    "DisplayName": "Southeast Asia",
+    "Slug": "sea"
+  },
+  {
+    "Region": "southeastasia3",
+    "DisplayName": "Southeast Asia 3",
+    "Slug": "sea3"
+  },
+  {
+    "Region": "southindia",
+    "DisplayName": "South India",
+    "Slug": "ins"
+  },
+  {
+    "Region": "spaincentral",
+    "DisplayName": "Spain Central",
+    "Slug": "esc"
+  },
+  {
+    "Region": "swedencentral",
+    "DisplayName": "Sweden Central",
+    "Slug": "sdc"
+  },
+  {
+    "Region": "switzerlandnorth",
+    "DisplayName": "Switzerland North",
+    "Slug": "szn"
+  },
+  {
+    "Region": "switzerlandwest",
+    "DisplayName": "Switzerland West",
+    "Slug": "szw"
+  },
+  {
+    "Region": "taiwannorth",
+    "DisplayName": "Taiwan North",
+    "Slug": "twn"
+  },
+  {
+    "Region": "uaecentral",
+    "DisplayName": "UAE Central",
+    "Slug": "uac"
+  },
+  {
+    "Region": "uaenorth",
+    "DisplayName": "UAE North",
+    "Slug": "uan"
+  },
+  {
+    "Region": "uksouth",
+    "DisplayName": "UK South",
+    "Slug": "uks"
+  },
+  {
+    "Region": "ukwest",
+    "DisplayName": "UK West",
+    "Slug": "ukw"
+  },
+  {
+    "Region": "usdodcentral",
+    "DisplayName": "US DoD Central",
+    "Slug": "udc"
+  },
+  {
+    "Region": "usdodeast",
+    "DisplayName": "US DoD East",
+    "Slug": "ude"
+  },
+  {
+    "Region": "usgovarizona",
+    "DisplayName": "US Gov Arizona",
+    "Slug": "uga"
+  },
+  {
+    "Region": "usgoviowa",
+    "DisplayName": "US Gov Iowa",
+    "Slug": "ugi"
+  },
+  {
+    "Region": "usgovtexas",
+    "DisplayName": "US Gov Texas",
+    "Slug": "ugt"
+  },
+  {
+    "Region": "usgovvirginia",
+    "DisplayName": "US Gov Virginia",
+    "Slug": "ugv"
+  },
+  {
+    "Region": "usnateast",
+    "DisplayName": "US Nat East",
+    "Slug": "exe"
+  },
+  {
+    "Region": "usnatwest",
+    "DisplayName": "US Nat West",
+    "Slug": "exw"
+  },
+  {
+    "Region": "usseceast",
+    "DisplayName": "US Sec East",
+    "Slug": "rxe"
+  },
+  {
+    "Region": "ussecwest",
+    "DisplayName": "US Sec West",
+    "Slug": "rxw"
+  },
+  {
+    "Region": "westcentralus",
+    "DisplayName": "West Central US",
+    "Slug": "wcus"
+  },
+  {
+    "Region": "westeurope",
+    "DisplayName": "West Europe",
+    "Slug": "we"
+  },
+  {
+    "Region": "westindia",
+    "DisplayName": "West India",
+    "Slug": "inw"
+  },
+  {
+    "Region": "westus",
+    "DisplayName": "West US",
+    "Slug": "wus"
+  },
+  {
+    "Region": "westus2",
+    "DisplayName": "West US 2",
+    "Slug": "wus2"
+  },
+  {
+    "Region": "westus3",
+    "DisplayName": "West US 3",
+    "Slug": "wus3"
+  }
+]
