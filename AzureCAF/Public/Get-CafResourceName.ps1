@@ -43,12 +43,14 @@ function Get-CafResourceName {
         One or more strings to append to the resource name, in order. Falls back to -ConventionPath's
         value if not specified.
     .PARAMETER Region
-        An Azure region to append to the resource name, as its ARM name (e.g. 'eastus') or display name
-        (e.g. 'East US') - resolved to the CAF-recommended abbreviation (e.g. 'eus') the same way
-        -ResourceType resolves to -Slug, and added after any -Suffix. Use Get-CafRegion to look up the
-        abbreviation a given region resolves to, or to see every region the module knows about. Region
-        abbreviations aren't officially published by Microsoft for every region, so an unrecognized value
-        errors rather than guessing - pass the code yourself via -Suffix instead if that happens.
+        An Azure region to append to the resource name, as its ARM name (e.g. 'eastus'), display name
+        (e.g. 'East US') or its CAF slug (e.g. 'eus') - resolved to the CAF-recommended abbreviation the
+        same way -ResourceType resolves to -Slug, and added after any -Suffix. Already passing the slug
+        in is a no-op that just confirms it's a recognized one. Falls back to -ConventionPath's value if
+        not specified. Use Get-CafRegion to look up the abbreviation a given region resolves to, or to
+        see every region the module knows about. Region abbreviations aren't officially published by
+        Microsoft for every region, so an unrecognized value errors rather than guessing - pass the code
+        yourself via -Suffix instead if that happens.
     .PARAMETER Separator
         The character(s) used to join the prefix, abbreviation and suffix segments together. Ignored for
         resource types that don't permit a separator character, in which case the segments are
@@ -81,9 +83,9 @@ function Get-CafResourceName {
         the same name idempotently, e.g. across repeated deployments. Ignored unless -RandomSuffixLength
         is specified.
     .PARAMETER ConventionPath
-        Path to a JSON file of organizational naming-convention defaults for -Prefix, -Suffix,
+        Path to a JSON file of organizational naming-convention defaults for -Prefix, -Suffix, -Region,
         -Separator, -InstanceNumberPadding and -RandomSuffixLength, created with
-        New-CafResourceNamingConvention. Any of those you also specify explicitly (including via the
+        New-CafNamingConvention. Any of those you also specify explicitly (including via the
         pipeline) take precedence over the file - this just saves retyping the same org-standard values
         on every call.
     .PARAMETER NoClean
@@ -152,8 +154,8 @@ function Get-CafResourceName {
     .EXAMPLE
         Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso -ConventionPath ./contoso.json
 
-        Uses -Prefix explicitly, but falls back to whatever -Suffix/-Separator/etc. are saved in
-        contoso.json (see New-CafResourceNamingConvention) for anything not specified here.
+        Uses -Prefix explicitly, but falls back to whatever -Suffix/-Region/-Separator/etc. are saved in
+        contoso.json (see New-CafNamingConvention) for anything not specified here.
     .EXAMPLE
         Import-Csv ./resources.csv | Get-CafResourceName
 
@@ -304,14 +306,16 @@ function Get-CafResourceName {
         $EffectivePrefix = if ($PSBoundParameters.ContainsKey('Prefix')) { $Prefix } else { $Convention.Prefix }
         $EffectiveSuffix = if ($PSBoundParameters.ContainsKey('Suffix')) { $Suffix } else { $Convention.Suffix }
 
-        if ($Region) {
-            $RegionDefinition = Resolve-CafRegion -Region $Region
+        $EffectiveRegion = if ($PSBoundParameters.ContainsKey('Region')) { $Region } else { $Convention.Region }
+
+        if ($EffectiveRegion) {
+            $RegionDefinition = Resolve-CafRegion -Region $EffectiveRegion
 
             if (-not $RegionDefinition) {
                 return
             }
 
-            Write-Verbose "Resolved region '$Region' to '$($RegionDefinition.Region)' (slug '$($RegionDefinition.Slug)')."
+            Write-Verbose "Resolved region '$EffectiveRegion' to '$($RegionDefinition.Region)' (slug '$($RegionDefinition.Slug)')."
             $EffectiveSuffix = @($EffectiveSuffix) + @($RegionDefinition.Slug) | Where-Object { $_ }
         }
 

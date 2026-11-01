@@ -128,18 +128,18 @@ VERBOSE: Final result: 'contosostxxxxxx'.
 
 ### Reusable naming conventions
 
-If your organization always uses the same prefix, separator, instance-number padding or random-suffix length, save them once with `New-CafResourceNamingConvention` instead of retyping them on every call:
+If your organization always uses the same prefix, region, separator, instance-number padding or random-suffix length, save them once with `New-CafNamingConvention` instead of retyping them on every call:
 
 ```powershell
-New-CafResourceNamingConvention -Path ./contoso-prod.json -Prefix contoso, prod -Separator '-' -InstanceNumberPadding 2
+New-CafNamingConvention -Path ./contoso-prod.json -Prefix contoso, prod -Region eastus -Separator '-' -InstanceNumberPadding 2
 
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -ConventionPath ./contoso-prod.json -InstanceNumber 1
 ```
 ```text
-contoso-prod-vm-01
+contoso-prod-vm-eus-01
 ```
 
-Anything you also specify explicitly (including via the pipeline) still takes precedence over the file.
+Anything you also specify explicitly (including via the pipeline) still takes precedence over the file. `-Region` is resolved and saved as its ARM name at this point, so a typo is caught here rather than on every later call that reads the file - `-RandomSuffixSeed` is deliberately not one of these saved defaults, since a shared seed baked into a convention file everyone reuses would make the "random" suffix identical for every one of those calls, defeating the uniqueness `-RandomSuffixLength` exists for.
 
 ### Validate a resource name
 

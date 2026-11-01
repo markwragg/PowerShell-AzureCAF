@@ -40,6 +40,13 @@ Looks up the same region by its display name instead of its ARM name.
 
 ### EXAMPLE 3
 ```
+Get-CafRegion -Region eus
+```
+
+Looks up the same region by its slug instead.
+
+### EXAMPLE 4
+```
 Get-CafRegion
 ```
 
@@ -49,11 +56,14 @@ Lists every region known to the module.
 
 ### -Region
 The ARM region name to search for, e.g.
-'eastus', or its display name, e.g.
-'East US'.
-Matches
-as a substring by default, same as -ResourceType on Get-CafResourceType, so 'east' alone matches
-multiple regions.
+'eastus', its display name, e.g.
+'East US', or its CAF
+slug, e.g.
+'eus'.
+The ARM name and display name match as a substring by default, same as
+-ResourceType on Get-CafResourceType, so 'east' alone matches multiple regions - the slug only
+matches exactly, since it's short enough that partial matching on it would mostly just be
+ambiguous.
 If omitted, every known region is returned.
 
 ```yaml
@@ -69,7 +79,7 @@ Accept wildcard characters: False
 ```
 
 ### -ProgressAction
-{{Fill ProgressAction Description}}
+{{ Fill ProgressAction Description }}
 
 ```yaml
 Type: ActionPreference
@@ -84,8 +94,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
-For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

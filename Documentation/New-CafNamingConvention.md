@@ -1,34 +1,43 @@
-# New-CafResourceNamingConvention
+# New-CafNamingConvention
 
 ## SYNOPSIS
-Saves a reusable set of Get-CafResourceName defaults (prefix, suffix, separator, etc.) to a JSON
-file, so your organization's naming convention doesn't need to be retyped on every call.
+Saves a reusable set of Get-CafResourceName defaults (prefix, suffix, region, separator, etc.)
+to a JSON file, so your organization's naming convention doesn't need to be retyped on every
+call.
 
 ## SYNTAX
 
 ```
-New-CafResourceNamingConvention [-Path] <String> [-Prefix <String[]>] [-Suffix <String[]>]
+New-CafNamingConvention [-Path] <String> [-Prefix <String[]>] [-Suffix <String[]>] [-Region <String>]
  [-Separator <String>] [-InstanceNumberPadding <Int32>] [-RandomSuffixLength <Int32>] [-Force]
  [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 Writes a small JSON file that Get-CafResourceName's -ConventionPath reads defaults from for
--Prefix, -Suffix, -Separator, -InstanceNumberPadding and -RandomSuffixLength.
-Anything you pass
-explicitly to Get-CafResourceName still takes precedence over the file - this is just a way to
-avoid repeating the same organization-standard values (company name, environment, region, your
-preferred separator/padding) on every call.
+-Prefix, -Suffix, -Region, -Separator, -InstanceNumberPadding and -RandomSuffixLength.
+Anything
+you pass explicitly to Get-CafResourceName still takes precedence over the file - this is just a
+way to avoid repeating the same organization-standard values (company name, environment, region,
+your preferred separator/padding) on every call.
+
+-RandomSuffixSeed deliberately isn't one of these defaults, even though Get-CafResourceName has
+it - a convention file is meant to be the same shared values reused verbatim by everyone who
+points -ConventionPath at it, but a seed baked in that way would make the "random" suffix
+identical for every one of those calls, defeating the uniqueness -RandomSuffixLength exists for.
+It only makes sense as a per-call value (e.g.
+for one idempotent redeploy), so it stays something
+you pass to Get-CafResourceName directly.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-New-CafResourceNamingConvention -Path ./contoso.json -Prefix contoso, prod -Separator '-' -InstanceNumberPadding 2
+New-CafNamingConvention -Path ./contoso.json -Prefix contoso, prod -Region eastus -Separator '-' -InstanceNumberPadding 2
 ```
 
-Saves a convention so that Get-CafResourceName -ConventionPath ./contoso.json applies that prefix,
-separator and padding by default.
+Saves a convention so that Get-CafResourceName -ConventionPath ./contoso.json applies that
+prefix, region, separator and padding by default.
 
 ### EXAMPLE 2
 ```
@@ -57,8 +66,8 @@ Accept wildcard characters: False
 
 ### -Prefix
 One or more strings to use as the default -Prefix, e.g.
-a company name, environment, or region -
-see the naming components guide this links to for what's commonly included.
+a company name or environment - see the
+naming components guide this links to for what's commonly included.
 
 ```yaml
 Type: String[]
@@ -77,6 +86,23 @@ One or more strings to use as the default -Suffix.
 
 ```yaml
 Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Region
+An Azure region (ARM name, display name or slug) to use as the default -Region - resolved and
+stored as its ARM region name, the same way Get-CafResourceName resolves it, so an unrecognized
+value is caught here rather than on every later call that uses the file.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -183,7 +209,7 @@ Accept wildcard characters: False
 ```
 
 ### -ProgressAction
-{{Fill ProgressAction Description}}
+{{ Fill ProgressAction Description }}
 
 ```yaml
 Type: ActionPreference
@@ -198,8 +224,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
-For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

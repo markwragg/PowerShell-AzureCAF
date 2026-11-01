@@ -23,6 +23,17 @@ Describe 'Get-CafRegion' {
         $Result.Slug | Should -Be 'eus'
     }
 
+    It 'Finds a region by its slug' {
+        $Result = Get-CafRegion -Region 'eus'
+        $Result.Region | Should -Be 'eastus'
+    }
+
+    It 'Matches the slug exactly rather than finding it ambiguous as a substring of other regions'' ARM names' {
+        # 'ae' is Australia East's slug, but also a substring of 'canadaeast' and 'israelcentral'.
+        $Result = Get-CafRegion -Region 'ae'
+        $Result.Region | Should -Be 'australiaeast'
+    }
+
     It 'Matches as a substring without requiring explicit wildcards' {
         $Result = Get-CafRegion -Region 'us2eu'
         $Result.Region | Should -Be 'eastus2euap'

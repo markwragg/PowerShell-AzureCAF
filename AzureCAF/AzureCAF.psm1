@@ -74,12 +74,13 @@ $ResourceCompleter = {
 $RegionCompleter = {
     param($CommandName, $ParameterName, $WordToComplete, $CommandAst, $FakeBoundParameters)
     $null = $CommandName, $ParameterName, $CommandAst, $FakeBoundParameters
-    # Matches against both the ARM region name and its display name, same as Resolve-CafRegion, so
-    # typing either 'east' or 'East US' offers a completion - but always completes to the ARM name,
-    # since that's the unambiguous value every other Azure PowerShell -Location parameter expects.
+    # Matches against the ARM region name, its display name or its slug, same fields Resolve-CafRegion
+    # accepts, so typing 'east', 'East US' or 'eus' all offer a completion - but always completes to the
+    # ARM name, since that's the unambiguous value every other Azure PowerShell -Location parameter
+    # expects.
     $Pattern = Get-CafWildcardPattern -Value $WordToComplete
     (Get-CafRegionDefinition) |
-        Where-Object { $_.Region -like $Pattern -or $_.DisplayName -like $Pattern } |
+        Where-Object { $_.Region -like $Pattern -or $_.DisplayName -like $Pattern -or $_.Slug -like $Pattern } |
         Sort-Object -Property Region -Unique |
         ForEach-Object { [System.Management.Automation.CompletionResult]::new($_.Region, "$($_.Region) ($($_.DisplayName))", 'ParameterValue', $_.DisplayName) }
 }

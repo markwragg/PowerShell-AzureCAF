@@ -124,9 +124,9 @@ Get-CafResourceName.
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso -ConventionPath ./contoso.json
 ```
 
-Uses -Prefix explicitly, but falls back to whatever -Suffix/-Separator/etc.
+Uses -Prefix explicitly, but falls back to whatever -Suffix/-Region/-Separator/etc.
 are saved in
-contoso.json (see New-CafResourceNamingConvention) for anything not specified here.
+contoso.json (see New-CafNamingConvention) for anything not specified here.
 
 ### EXAMPLE 13
 ```
@@ -254,16 +254,20 @@ Accept wildcard characters: False
 
 ### -Region
 An Azure region to append to the resource name, as its ARM name (e.g.
-'eastus') or display name
+'eastus'), display name
 (e.g.
-'East US') - resolved to the CAF-recommended abbreviation (e.g.
-'eus') the same way
--ResourceType resolves to -Slug, and added after any -Suffix.
-Use Get-CafRegion to look up the
-abbreviation a given region resolves to, or to see every region the module knows about.
-Region
-abbreviations aren't officially published by Microsoft for every region, so an unrecognized value
-errors rather than guessing - pass the code yourself via -Suffix instead if that happens.
+'East US') or its CAF slug (e.g.
+'eus') - resolved to the CAF-recommended abbreviation the
+same way -ResourceType resolves to -Slug, and added after any -Suffix.
+Already passing the slug
+in is a no-op that just confirms it's a recognized one.
+Falls back to -ConventionPath's value if
+not specified.
+Use Get-CafRegion to look up the abbreviation a given region resolves to, or to
+see every region the module knows about.
+Region abbreviations aren't officially published by
+Microsoft for every region, so an unrecognized value errors rather than guessing - pass the code
+yourself via -Suffix instead if that happens.
 
 ```yaml
 Type: String
@@ -403,9 +407,9 @@ Accept wildcard characters: False
 ```
 
 ### -ConventionPath
-Path to a JSON file of organizational naming-convention defaults for -Prefix, -Suffix,
+Path to a JSON file of organizational naming-convention defaults for -Prefix, -Suffix, -Region,
 -Separator, -InstanceNumberPadding and -RandomSuffixLength, created with
-New-CafResourceNamingConvention.
+New-CafNamingConvention.
 Any of those you also specify explicitly (including via the
 pipeline) take precedence over the file - this just saves retyping the same org-standard values
 on every call.
@@ -462,7 +466,7 @@ Accept wildcard characters: False
 ```
 
 ### -ProgressAction
-{{Fill ProgressAction Description}}
+{{ Fill ProgressAction Description }}
 
 ```yaml
 Type: ActionPreference
@@ -477,8 +481,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
-For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

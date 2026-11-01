@@ -14,9 +14,11 @@ function Get-CafRegion {
         list is sourced from https://www.jlaundry.nz/2022/azure_region_abbreviations/, a community
         reference, and may not cover newly-announced regions.
     .PARAMETER Region
-        The ARM region name to search for, e.g. 'eastus', or its display name, e.g. 'East US'. Matches
-        as a substring by default, same as -ResourceType on Get-CafResourceType, so 'east' alone matches
-        multiple regions. If omitted, every known region is returned.
+        The ARM region name to search for, e.g. 'eastus', its display name, e.g. 'East US', or its CAF
+        slug, e.g. 'eus'. The ARM name and display name match as a substring by default, same as
+        -ResourceType on Get-CafResourceType, so 'east' alone matches multiple regions - the slug only
+        matches exactly, since it's short enough that partial matching on it would mostly just be
+        ambiguous. If omitted, every known region is returned.
     .EXAMPLE
         Get-CafRegion -Region eastus
 
@@ -25,6 +27,10 @@ function Get-CafRegion {
         Get-CafRegion -Region 'East US'
 
         Looks up the same region by its display name instead of its ARM name.
+    .EXAMPLE
+        Get-CafRegion -Region eus
+
+        Looks up the same region by its slug instead.
     .EXAMPLE
         Get-CafRegion
 
@@ -39,13 +45,18 @@ function Get-CafRegion {
         $Region
     )
 
-    $definitions = @(Get-CafRegionDefinition)
+    $AllDefinitions = @(Get-CafRegionDefinition)
+    $definitions = $AllDefinitions
 
     if ($Region) {
-        $definitions = Select-CafMatch -InputObject $definitions -Property Region -Value $Region
+        $definitions = @($AllDefinitions | Where-Object Slug -EQ $Region)
 
         if ($definitions.Count -eq 0) {
-            $definitions = Select-CafMatch -InputObject @(Get-CafRegionDefinition) -Property DisplayName -Value $Region
+            $definitions = Select-CafMatch -InputObject $AllDefinitions -Property Region -Value $Region
+        }
+
+        if ($definitions.Count -eq 0) {
+            $definitions = Select-CafMatch -InputObject $AllDefinitions -Property DisplayName -Value $Region
         }
     }
 

@@ -44,6 +44,18 @@ Describe 'Get-CafResourceName' {
                 Should -Be 'contoso-vm-eus'
         }
 
+        It 'Accepts the slug itself as a region value' {
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'eus' |
+                Should -Be 'contoso-vm-eus'
+        }
+
+        It 'Resolves a short slug exactly rather than finding it ambiguous as a substring of other regions'' ARM names' {
+            # 'ae' is Australia East's slug, but also a substring of 'canadaeast' and 'israelcentral' -
+            # it must resolve to Australia East, not error as ambiguous.
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'ae' |
+                Should -Be 'contoso-vm-ae'
+        }
+
         It 'Works with no explicit -Suffix' {
             Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'eastus' |
                 Should -Be 'contoso-vm-eus'
