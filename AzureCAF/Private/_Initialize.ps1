@@ -1,5 +1,5 @@
-# The JSON data files live alongside this one (Public/) so $PSScriptRoot finds them correctly in both
-# layouts this file runs in: dot-sourced here in dev mode ($PSScriptRoot = this Public folder), and
+# The JSON data files live alongside this one (Private/) so $PSScriptRoot finds them correctly in both
+# layouts this file runs in: dot-sourced here in dev mode ($PSScriptRoot = this Private folder), and
 # inlined into the combined/staged .psm1 (see Build/Tasks/CombineFunctionsAndStage.ps1), where the
 # build copies these same two files to the staged module's root - $PSScriptRoot there resolves to that
 # root too, since the combined file *is* the module's root script at that point.

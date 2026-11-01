@@ -2,7 +2,7 @@
 
 ## !Deploy 0.4.0
 
-* Fixes previous issue with the module that stopped most cmdlets working due to code in the PSM1 file not being combined into the final module. These now exist in `_Initialize.ps1` so are included when files under `/Public` are added.
+* Fixes previous issue with the module that stopped most cmdlets working due to code in the PSM1 file not being combined into the final module. These now exist in `_Initialize.ps1` (and `resourceDefinition.json`/`regionDefinition.json` alongside it) under `/Private`, so they're included automatically whenever files under `/Public` or `/Private` are combined.
 
 ## [0.3.1] - 2026-11-01
 

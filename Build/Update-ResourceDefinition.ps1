@@ -32,7 +32,7 @@
     actually just renamed.
 .PARAMETER Path
     Path to the resourceDefinition.json file to report on (and, with -AutoApply, update). Defaults
-    to the module's own copy at AzureCAF/Public/resourceDefinition.json.
+    to the module's own copy at AzureCAF/Private/resourceDefinition.json.
 .PARAMETER AutoApply
     Apply the "new, borrowable" and "slug changed" entries directly to -Path. Entries with no
     naming-rule data to borrow, and removed/renamed entries, are still left for manual review.
@@ -58,7 +58,7 @@
 [CmdletBinding()]
 param(
     [string]
-    $Path = (Join-Path $PSScriptRoot '..\AzureCAF\Public\resourceDefinition.json'),
+    $Path = (Join-Path $PSScriptRoot '..\AzureCAF\Private\resourceDefinition.json'),
 
     [switch]
     $AutoApply,

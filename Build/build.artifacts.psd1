@@ -4,7 +4,7 @@
 # root of the staged module folder if they exist.
 @{
     ModuleFiles = @(
-        'Public/resourceDefinition.json'
-        'Public/regionDefinition.json'
+        'Private/resourceDefinition.json'
+        'Private/regionDefinition.json'
     )
 }
