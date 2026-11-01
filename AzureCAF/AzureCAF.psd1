@@ -87,7 +87,7 @@ AliasesToExport = @()
 # ModuleList = @()
 
 # List of all files packaged with this module
-FileList = @('resourceDefinition.json','regionDefinition.json')
+# FileList = @()
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'https://github.com/markwragg/PowerShell-AzureCAF/blob/main/README.md'
+        ReleaseNotes = 'https://github.com/markwragg/PowerShell-AzureCAF/blob/main/CHANGELOG.md'
 
         # Prerelease string of this module
         # Prerelease = ''

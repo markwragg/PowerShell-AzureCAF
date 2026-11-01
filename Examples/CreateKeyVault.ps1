@@ -20,7 +20,7 @@ param(
 
 Import-Module AzureCAF
 
-$NamingConvention = @{
+$NamingConventionParams = @{
     Path = "./$organisation-$environment.json"
     Prefix = $organisation,$environment
     Region = $region
@@ -28,7 +28,7 @@ $NamingConvention = @{
 
 # Org-standard prefix/region, saved once and reused for every resource in this deployment
 
-$NamingConvention = New-CafNamingConvention @NamingConvention
+$NamingConvention = New-CafNamingConvention @NamingConventionParams -Force
 
 if (-not $NamingConvention) {
     throw "Failed to create naming convention. Please check the JSON file and parameters."
@@ -47,7 +47,7 @@ $kvStorage = @{
     RandomSuffixSeed = 1    # Ensures consistent random suffix for storage account name
 }
 
-$stName = Get-CafResourceName @ConventionPath @kvStorage -ResourceType 'Microsoft.Storage/storageAccounts'
+$stName = Get-CafResourceName @kvStorage -ResourceType 'Microsoft.Storage/storageAccounts' -ConventionPath $ConventionPath
 
 # Output the generated names for verification
 

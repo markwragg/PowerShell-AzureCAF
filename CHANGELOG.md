@@ -1,5 +1,9 @@
 # Change Log
 
+## !Deploy 0.4.0
+
+* Fixes previous issue with the module that stopped most cmdlets working due to code in the PSM1 file not being combined into the final module. These now exist in `_Initialize.ps1` so are included when files under `/Public` are added.
+
 ## [0.3.1] - 2026-11-01
 
 * `Get-CafRegion` now also returns `PairedRegion`, the region's Azure-paired region (`$null` if it doesn't have one), sourced from Microsoft's official [list of Azure regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list) - informational only, `Get-CafResourceName`'s `-Region` doesn't resolve against it.
