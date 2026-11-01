@@ -1,7 +1,7 @@
 # PowerShell-AzureCAF
 
 [![Build Status](https://github.com/markwragg/Powershell-AzureCAF/actions/workflows/build.yml/badge.svg)](https://github.com/markwragg/Powershell-AzureCAF/actions/workflows/build.yml)
-![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)
+![coverage](https://img.shields.io/badge/coverage-96%25-brightgreen.svg)
 [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/AzureCAF?label=PS%20Gallery)](https://www.powershellgallery.com/packages/AzureCAF)
 [![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/AzureCAF?color=D3D3D3)](https://www.powershellgallery.com/packages/AzureCAF)
 

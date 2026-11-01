@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.4.0
+## [0.4.0] - 2026-11-01
 
 * Fixes previous issue with the module that stopped most cmdlets working due to code in the PSM1 file not being combined into the final module. These now exist in `_Initialize.ps1` (and `resourceDefinition.json`/`regionDefinition.json` alongside it) under `/Private`, so they're included automatically whenever files under `/Public` or `/Private` are combined.
 
