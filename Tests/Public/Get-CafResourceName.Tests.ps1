@@ -34,9 +34,9 @@ Describe 'Get-CafResourceName' {
 
     Context 'Region' {
 
-        It 'Resolves a region to its abbreviation and appends it after any suffix' {
+        It 'Resolves a region to its abbreviation and inserts it before any suffix' {
             Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Suffix '01' -Region 'eastus' |
-                Should -Be 'contoso-vm-01-eus'
+                Should -Be 'contoso-vm-eus-01'
         }
 
         It 'Resolves a region given by display name' {
@@ -349,7 +349,7 @@ Describe 'Get-CafResourceName' {
     Context 'Partial matching' {
 
         It 'Matches -ResourceType as a substring when there is no exact match' {
-            Get-CafResourceName -ResourceType 'KeyVault' -Prefix 'contoso' -Suffix '01' |
+            Get-CafResourceName -ResourceType 'KeyVault/vaults' -Prefix 'contoso' -Suffix '01' |
                 Should -Be 'contoso-kv-01'
         }
 

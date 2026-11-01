@@ -45,12 +45,13 @@ function Get-CafResourceName {
     .PARAMETER Region
         An Azure region to append to the resource name, as its ARM name (e.g. 'eastus'), display name
         (e.g. 'East US') or its CAF slug (e.g. 'eus') - resolved to the CAF-recommended abbreviation the
-        same way -ResourceType resolves to -Slug, and added after any -Suffix. Already passing the slug
-        in is a no-op that just confirms it's a recognized one. Falls back to -ConventionPath's value if
-        not specified. Use Get-CafRegion to look up the abbreviation a given region resolves to, or to
-        see every region the module knows about. Region abbreviations aren't officially published by
-        Microsoft for every region, so an unrecognized value errors rather than guessing - pass the code
-        yourself via -Suffix instead if that happens.
+        same way -ResourceType resolves to -Slug, and inserted after the resource type's slug but before
+        any -Suffix, so a -Suffix you specify is always the last segment (aside from an instance number).
+        Already passing the slug in is a no-op that just confirms it's a recognized one. Falls back to
+        -ConventionPath's value if not specified. Use Get-CafRegion to look up the abbreviation a given
+        region resolves to, or to see every region the module knows about. Region abbreviations aren't
+        officially published by Microsoft for every region, so an unrecognized value errors rather than
+        guessing - pass the code yourself via -Suffix instead if that happens.
     .PARAMETER Separator
         The character(s) used to join the prefix, abbreviation and suffix segments together. Ignored for
         resource types that don't permit a separator character, in which case the segments are
@@ -122,7 +123,8 @@ function Get-CafResourceName {
         Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
 
         Generates 'contoso-prod-vm-eus' - -Region resolves 'eastus' to its CAF-recommended abbreviation
-        the same way -ResourceType resolves to its slug, and appends it after any -Suffix.
+        the same way -ResourceType resolves to its slug, and inserts it before any -Suffix, so -Suffix
+        stays the last segment.
     .EXAMPLE
         Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
 
@@ -316,7 +318,7 @@ function Get-CafResourceName {
             }
 
             Write-Verbose "Resolved region '$EffectiveRegion' to '$($RegionDefinition.Region)' (slug '$($RegionDefinition.Slug)')."
-            $EffectiveSuffix = @($EffectiveSuffix) + @($RegionDefinition.Slug) | Where-Object { $_ }
+            $EffectiveRegionSlug = $RegionDefinition.Slug
         }
 
         $EffectiveSeparator = if ($PSBoundParameters.ContainsKey('Separator')) { $Separator } elseif ($Convention.Separator) { $Convention.Separator } else { $Separator }
@@ -336,10 +338,12 @@ function Get-CafResourceName {
         if ($NoClean) {
             $CleanPrefix = $EffectivePrefix
             $CleanSuffix = $EffectiveSuffix
+            $CleanRegionSlug = $EffectiveRegionSlug
         }
         else {
             $CleanPrefix = Get-CleanString -InputObject $EffectivePrefix -Pattern $definition.InvalidCharsRegex
             $CleanSuffix = Get-CleanString -InputObject $EffectiveSuffix -Pattern $definition.InvalidCharsRegex
+            $CleanRegionSlug = Get-CleanString -InputObject $EffectiveRegionSlug -Pattern $definition.InvalidCharsRegex
         }
 
         $ActualSeparator = if ($definition.Dashes) { $EffectiveSeparator } else { '' }
@@ -349,7 +353,7 @@ function Get-CafResourceName {
         $EndInstanceNumber = $StartInstanceNumber + $Count - 1
 
         # Reserve space based on the longest instance number in the sequence, so the trimmed base name
-        # (prefix/slug/suffix) is the same length for every generated name, not just the first one.
+        # (prefix/slug/region/suffix) is the same length for every generated name, not just the first one.
         $InstanceSegment = if ($HasInstanceNumber) { $EndInstanceNumber.ToString().PadLeft($EffectiveInstanceNumberPadding, '0') } else { $null }
 
         $reservedLength = 0
@@ -368,10 +372,10 @@ function Get-CafResourceName {
         $mainBudget = $definition.MaxLength - $reservedLength
 
         if ($reservedDescriptions.Count -gt 0) {
-            Write-Verbose "Reserving $reservedLength character(s) for $($reservedDescriptions -join ' and '); $mainBudget of $($definition.MaxLength) remain for the prefix/slug/suffix."
+            Write-Verbose "Reserving $reservedLength character(s) for $($reservedDescriptions -join ' and '); $mainBudget of $($definition.MaxLength) remain for the prefix/slug/region/suffix."
         }
         else {
-            Write-Verbose "No reserved segments; the full $mainBudget character limit is available for the prefix/slug/suffix."
+            Write-Verbose "No reserved segments; the full $mainBudget character limit is available for the prefix/slug/region/suffix."
         }
 
         if ($mainBudget -lt $definition.Slug.Length) {
@@ -379,7 +383,7 @@ function Get-CafResourceName {
             return
         }
 
-        $resourceArr = @($CleanPrefix) + @($definition.Slug) + @($CleanSuffix) | Where-Object { $_ }
+        $resourceArr = @($CleanPrefix) + @($definition.Slug) + @($CleanRegionSlug) + @($CleanSuffix) | Where-Object { $_ }
 
         $resourceName = $resourceArr -join $ActualSeparator
         Write-Verbose "Joined '$($resourceArr -join "', '")' with separator '$ActualSeparator' -> '$resourceName' ($($resourceName.Length) characters)."

@@ -70,7 +70,8 @@ Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix cont
 ```
 
 Generates 'contoso-prod-vm-eus' - -Region resolves 'eastus' to its CAF-recommended abbreviation
-the same way -ResourceType resolves to its slug, and appends it after any -Suffix.
+the same way -ResourceType resolves to its slug, and inserts it before any -Suffix, so -Suffix
+stays the last segment.
 
 ### EXAMPLE 6
 ```
@@ -258,7 +259,8 @@ An Azure region to append to the resource name, as its ARM name (e.g.
 (e.g.
 'East US') or its CAF slug (e.g.
 'eus') - resolved to the CAF-recommended abbreviation the
-same way -ResourceType resolves to -Slug, and added after any -Suffix.
+same way -ResourceType resolves to -Slug, and inserted after the resource type's slug but before
+any -Suffix, so a -Suffix you specify is always the last segment (aside from an instance number).
 Already passing the slug
 in is a no-op that just confirms it's a recognized one.
 Falls back to -ConventionPath's value if
