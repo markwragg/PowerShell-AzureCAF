@@ -12,7 +12,9 @@ Get-CafRegion [[-Region] <String>] [-ProgressAction <ActionPreference>] [<Common
 ## DESCRIPTION
 Searches the module's bundled regionDefinition.json for Azure regions and returns the short
 abbreviation Get-CafResourceName's -Region parameter resolves it to (e.g.
-'eastus' -\> 'eus').
+'eastus' -\> 'eus'),
+along with its Azure-paired region (e.g.
+'eastus' -\> 'westus'), if it has one.
 
 This is a local, offline lookup against a static data set bundled with the module - it's not a
 replacement for Get-AzLocation (from the Az.Resources module), which calls the live Azure
@@ -21,6 +23,12 @@ Resource Manager API to report which regions are available to a subscription rig
 Region abbreviations aren't officially published by Microsoft for every region - the bundled
 list is sourced from https://www.jlaundry.nz/2022/azure_region_abbreviations/, a community
 reference, and may not cover newly-announced regions.
+PairedRegion is sourced from Microsoft's
+official https://learn.microsoft.com/en-us/azure/reliability/regions-list and is $null for a
+region that doesn't have one - newer regions increasingly don't, having moved to availability
+zones instead of a paired region for resiliency.
+PairedRegion is informational only;
+Get-CafResourceName's -Region doesn't resolve against it.
 
 ## EXAMPLES
 
@@ -29,7 +37,7 @@ reference, and may not cover newly-announced regions.
 Get-CafRegion -Region eastus
 ```
 
-Returns the 'eus' abbreviation for East US.
+Returns the 'eus' abbreviation for East US, along with its paired region, 'westus'.
 
 ### EXAMPLE 2
 ```

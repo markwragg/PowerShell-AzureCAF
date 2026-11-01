@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy
+## [0.3.1] - 2026-11-01
 
 * `Get-CafRegion` now also returns `PairedRegion`, the region's Azure-paired region (`$null` if it doesn't have one), sourced from Microsoft's official [list of Azure regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list) - informational only, `Get-CafResourceName`'s `-Region` doesn't resolve against it.
 
