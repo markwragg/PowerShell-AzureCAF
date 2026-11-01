@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.5.0
+## [0.5.0] - 2026-11-01
 
 * [Fix] `Get-CafResourceName`'s `-Region` segment is now inserted after the resource type's slug but before any `-Suffix`, instead of after it, so `-Suffix` is always the last segment (aside from an instance number) as users of CAF naming conventions expect.
 * Added 41 resource types that are on Microsoft's current CAF abbreviation guide but were missing from `resourceDefinition.json` (Fabric Capacity, Azure Managed Grafana, Key Vault Managed HSM, Managed DevOps Pools, the Azure Arc and Azure Enclave families, and others) - naming rules researched from the ARM template reference docs, since none of them are yet listed on Microsoft's naming-rules guide. `Microsoft.Web/hostingEnvironments` and `Microsoft.Network/virtualHubs` now also resolve a second, equally valid `-Resource` (`Hosting environment` and `Route server` respectively) alongside their existing entry - disambiguate with `-Resource` if you use either ARM type with `-ResourceType` alone. A "VM storage account" entry for the same ARM type as the existing `Storage account` was deliberately **not** added despite appearing on Microsoft's guide: it shares identical naming rules with the existing entry (the two are only distinguished by abbreviation, 'stvm' vs 'st'), so adding it would only have made every existing `-ResourceType Microsoft.Storage/storageAccounts` caller suddenly ambiguous for no behavioral benefit.

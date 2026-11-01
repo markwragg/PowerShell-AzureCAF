@@ -261,15 +261,14 @@ An Azure region to append to the resource name, as its ARM name (e.g.
 'eus') - resolved to the CAF-recommended abbreviation the
 same way -ResourceType resolves to -Slug, and inserted after the resource type's slug but before
 any -Suffix, so a -Suffix you specify is always the last segment (aside from an instance number).
-Already passing the slug
-in is a no-op that just confirms it's a recognized one.
-Falls back to -ConventionPath's value if
-not specified.
-Use Get-CafRegion to look up the abbreviation a given region resolves to, or to
-see every region the module knows about.
-Region abbreviations aren't officially published by
-Microsoft for every region, so an unrecognized value errors rather than guessing - pass the code
-yourself via -Suffix instead if that happens.
+Already passing the slug in is a no-op that just confirms it's a recognized one.
+Falls back to
+-ConventionPath's value if not specified.
+Use Get-CafRegion to look up the abbreviation a given
+region resolves to, or to see every region the module knows about.
+Region abbreviations aren't
+officially published by Microsoft for every region, so an unrecognized value errors rather than
+guessing - pass the code yourself via -Suffix instead if that happens.
 
 ```yaml
 Type: String

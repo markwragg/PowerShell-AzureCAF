@@ -864,6 +864,18 @@
     "ValidationRegex": "^[a-zA-Z0-9-_]{3,64}$"
   },
   {
+    "ResourceType": "Microsoft.Databricks/workspaces/accessConnectors",
+    "Resource": "Azure Databricks Access Connector",
+    "Slug": "dbac",
+    "Scope": "resourceGroup",
+    "MinLength": 3,
+    "MaxLength": 64,
+    "Lowercase": false,
+    "Dashes": true,
+    "InvalidCharsRegex": "[^0-9A-Za-z_-]",
+    "ValidationRegex": "^[a-zA-Z0-9-_]{3,64}$"
+  },
+  {
     "ResourceType": "Microsoft.DataFactory/factories",
     "Resource": "Azure Data Factory",
     "Slug": "adf",
