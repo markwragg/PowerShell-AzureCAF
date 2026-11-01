@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.3.0
+## [0.3.0] - 2026-11-01
 
 * Validated `regionDefinition.json` against Microsoft's official [list of Azure regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list): removed entries that don't appear there (`Brazil US`, the retired classic `Germany Central`/`Germany Northeast`, `Jio India Central`/`Jio India West`, `Malaysia South`, `Sweden South`) and added `India South Central`, `Southeast Asia 3` and `Taiwan North`, which it lists but the original data source predated.
 * `Get-CafResourceName`'s `-Region` parameter (and `Get-CafRegion`'s `-Region`) now also accepts the slug itself (e.g. `-Region eus`), matched exactly rather than as a substring, so passing through a value already known to be valid is a no-op instead of an error.
