@@ -2,386 +2,463 @@
   {
     "Region": "australiacentral",
     "DisplayName": "Australia Central",
-    "Slug": "acl"
+    "Slug": "acl",
+    "PairedRegion": "australiacentral2"
   },
   {
     "Region": "australiacentral2",
     "DisplayName": "Australia Central 2",
-    "Slug": "acl2"
+    "Slug": "acl2",
+    "PairedRegion": "australiacentral"
   },
   {
     "Region": "australiaeast",
     "DisplayName": "Australia East",
-    "Slug": "ae"
+    "Slug": "ae",
+    "PairedRegion": "australiasoutheast"
   },
   {
     "Region": "australiasoutheast",
     "DisplayName": "Australia Southeast",
-    "Slug": "ase"
+    "Slug": "ase",
+    "PairedRegion": "australiaeast"
   },
   {
     "Region": "austriaeast",
     "DisplayName": "Austria East",
-    "Slug": "aue"
+    "Slug": "aue",
+    "PairedRegion": null
   },
   {
     "Region": "belgiumcentral",
     "DisplayName": "Belgium Central",
-    "Slug": "bec"
+    "Slug": "bec",
+    "PairedRegion": null
   },
   {
     "Region": "brazilsouth",
     "DisplayName": "Brazil South",
-    "Slug": "brs"
+    "Slug": "brs",
+    "PairedRegion": "southcentralus"
   },
   {
     "Region": "brazilsoutheast",
     "DisplayName": "Brazil Southeast",
-    "Slug": "bse"
+    "Slug": "bse",
+    "PairedRegion": "brazilsouth"
   },
   {
     "Region": "canadacentral",
     "DisplayName": "Canada Central",
-    "Slug": "cnc"
+    "Slug": "cnc",
+    "PairedRegion": "canadaeast"
   },
   {
     "Region": "canadaeast",
     "DisplayName": "Canada East",
-    "Slug": "cne"
+    "Slug": "cne",
+    "PairedRegion": "canadacentral"
   },
   {
     "Region": "centralindia",
     "DisplayName": "Central India",
-    "Slug": "inc"
+    "Slug": "inc",
+    "PairedRegion": "southindia"
   },
   {
     "Region": "centralus",
     "DisplayName": "Central US",
-    "Slug": "cus"
+    "Slug": "cus",
+    "PairedRegion": "eastus2"
   },
   {
     "Region": "centraluseuap",
     "DisplayName": "Central US EUAP",
-    "Slug": "ccy"
+    "Slug": "ccy",
+    "PairedRegion": null
   },
   {
     "Region": "chilecentral",
     "DisplayName": "Chile Central",
-    "Slug": "clc"
+    "Slug": "clc",
+    "PairedRegion": null
   },
   {
     "Region": "chinaeast",
     "DisplayName": "China East",
-    "Slug": "sha"
+    "Slug": "sha",
+    "PairedRegion": null
   },
   {
     "Region": "chinaeast2",
     "DisplayName": "China East 2",
-    "Slug": "sha2"
+    "Slug": "sha2",
+    "PairedRegion": null
   },
   {
     "Region": "chinaeast3",
     "DisplayName": "China East 3",
-    "Slug": "sha3"
+    "Slug": "sha3",
+    "PairedRegion": null
   },
   {
     "Region": "chinanorth",
     "DisplayName": "China North",
-    "Slug": "bjb"
+    "Slug": "bjb",
+    "PairedRegion": null
   },
   {
     "Region": "chinanorth2",
     "DisplayName": "China North 2",
-    "Slug": "bjb2"
+    "Slug": "bjb2",
+    "PairedRegion": null
   },
   {
     "Region": "chinanorth3",
     "DisplayName": "China North 3",
-    "Slug": "bjb3"
+    "Slug": "bjb3",
+    "PairedRegion": null
   },
   {
     "Region": "denmarkeast",
     "DisplayName": "Denmark East",
-    "Slug": "dke"
+    "Slug": "dke",
+    "PairedRegion": null
   },
   {
     "Region": "eastasia",
     "DisplayName": "East Asia",
-    "Slug": "ea"
+    "Slug": "ea",
+    "PairedRegion": "southeastasia"
   },
   {
     "Region": "eastus",
     "DisplayName": "East US",
-    "Slug": "eus"
+    "Slug": "eus",
+    "PairedRegion": "westus"
   },
   {
     "Region": "eastus2",
     "DisplayName": "East US 2",
-    "Slug": "eus2"
+    "Slug": "eus2",
+    "PairedRegion": "centralus"
   },
   {
     "Region": "eastus2euap",
     "DisplayName": "East US 2 EUAP",
-    "Slug": "ecy"
+    "Slug": "ecy",
+    "PairedRegion": null
   },
   {
     "Region": "francecentral",
     "DisplayName": "France Central",
-    "Slug": "frc"
+    "Slug": "frc",
+    "PairedRegion": "francesouth"
   },
   {
     "Region": "francesouth",
     "DisplayName": "France South",
-    "Slug": "frs"
+    "Slug": "frs",
+    "PairedRegion": "francecentral"
   },
   {
     "Region": "germanynorth",
     "DisplayName": "Germany North",
-    "Slug": "gn"
+    "Slug": "gn",
+    "PairedRegion": "germanywestcentral"
   },
   {
     "Region": "germanywestcentral",
     "DisplayName": "Germany West Central",
-    "Slug": "gwc"
+    "Slug": "gwc",
+    "PairedRegion": "germanynorth"
   },
   {
     "Region": "indiasouthcentral",
     "DisplayName": "India South Central",
-    "Slug": "insc"
+    "Slug": "insc",
+    "PairedRegion": "centralindia"
   },
   {
     "Region": "indonesiacentral",
     "DisplayName": "Indonesia Central",
-    "Slug": "idc"
+    "Slug": "idc",
+    "PairedRegion": null
   },
   {
     "Region": "israelcentral",
     "DisplayName": "Israel Central",
-    "Slug": "ilc"
+    "Slug": "ilc",
+    "PairedRegion": null
   },
   {
     "Region": "italynorth",
     "DisplayName": "Italy North",
-    "Slug": "itn"
+    "Slug": "itn",
+    "PairedRegion": null
   },
   {
     "Region": "japaneast",
     "DisplayName": "Japan East",
-    "Slug": "jpe"
+    "Slug": "jpe",
+    "PairedRegion": "japanwest"
   },
   {
     "Region": "japanwest",
     "DisplayName": "Japan West",
-    "Slug": "jpw"
+    "Slug": "jpw",
+    "PairedRegion": "japaneast"
   },
   {
     "Region": "koreacentral",
     "DisplayName": "Korea Central",
-    "Slug": "krc"
+    "Slug": "krc",
+    "PairedRegion": "koreasouth"
   },
   {
     "Region": "koreasouth",
     "DisplayName": "Korea South",
-    "Slug": "krs"
+    "Slug": "krs",
+    "PairedRegion": "koreacentral"
   },
   {
     "Region": "malaysiawest",
     "DisplayName": "Malaysia West",
-    "Slug": "myw"
+    "Slug": "myw",
+    "PairedRegion": null
   },
   {
     "Region": "mexicocentral",
     "DisplayName": "Mexico Central",
-    "Slug": "mxc"
+    "Slug": "mxc",
+    "PairedRegion": null
   },
   {
     "Region": "newzealandnorth",
     "DisplayName": "New Zealand North",
-    "Slug": "nzn"
+    "Slug": "nzn",
+    "PairedRegion": null
   },
   {
     "Region": "northcentralus",
     "DisplayName": "North Central US",
-    "Slug": "ncus"
+    "Slug": "ncus",
+    "PairedRegion": "southcentralus"
   },
   {
     "Region": "northeurope",
     "DisplayName": "North Europe",
-    "Slug": "ne"
+    "Slug": "ne",
+    "PairedRegion": "westeurope"
   },
   {
     "Region": "norwayeast",
     "DisplayName": "Norway East",
-    "Slug": "nwe"
+    "Slug": "nwe",
+    "PairedRegion": "norwaywest"
   },
   {
     "Region": "norwaywest",
     "DisplayName": "Norway West",
-    "Slug": "nww"
+    "Slug": "nww",
+    "PairedRegion": "norwayeast"
   },
   {
     "Region": "polandcentral",
     "DisplayName": "Poland Central",
-    "Slug": "plc"
+    "Slug": "plc",
+    "PairedRegion": null
   },
   {
     "Region": "qatarcentral",
     "DisplayName": "Qatar Central",
-    "Slug": "qac"
+    "Slug": "qac",
+    "PairedRegion": null
   },
   {
     "Region": "southafricanorth",
     "DisplayName": "South Africa North",
-    "Slug": "san"
+    "Slug": "san",
+    "PairedRegion": "southafricawest"
   },
   {
     "Region": "southafricawest",
     "DisplayName": "South Africa West",
-    "Slug": "saw"
+    "Slug": "saw",
+    "PairedRegion": "southafricanorth"
   },
   {
     "Region": "southcentralus",
     "DisplayName": "South Central US",
-    "Slug": "scus"
+    "Slug": "scus",
+    "PairedRegion": "northcentralus"
   },
   {
     "Region": "southeastasia",
     "DisplayName": "Southeast Asia",
-    "Slug": "sea"
+    "Slug": "sea",
+    "PairedRegion": "eastasia"
   },
   {
     "Region": "southeastasia3",
     "DisplayName": "Southeast Asia 3",
-    "Slug": "sea3"
+    "Slug": "sea3",
+    "PairedRegion": "malaysiawest"
   },
   {
     "Region": "southindia",
     "DisplayName": "South India",
-    "Slug": "ins"
+    "Slug": "ins",
+    "PairedRegion": "centralindia"
   },
   {
     "Region": "spaincentral",
     "DisplayName": "Spain Central",
-    "Slug": "esc"
+    "Slug": "esc",
+    "PairedRegion": null
   },
   {
     "Region": "swedencentral",
     "DisplayName": "Sweden Central",
-    "Slug": "sdc"
+    "Slug": "sdc",
+    "PairedRegion": null
   },
   {
     "Region": "switzerlandnorth",
     "DisplayName": "Switzerland North",
-    "Slug": "szn"
+    "Slug": "szn",
+    "PairedRegion": "switzerlandwest"
   },
   {
     "Region": "switzerlandwest",
     "DisplayName": "Switzerland West",
-    "Slug": "szw"
+    "Slug": "szw",
+    "PairedRegion": "switzerlandnorth"
   },
   {
     "Region": "taiwannorth",
     "DisplayName": "Taiwan North",
-    "Slug": "twn"
+    "Slug": "twn",
+    "PairedRegion": null
   },
   {
     "Region": "uaecentral",
     "DisplayName": "UAE Central",
-    "Slug": "uac"
+    "Slug": "uac",
+    "PairedRegion": "uaenorth"
   },
   {
     "Region": "uaenorth",
     "DisplayName": "UAE North",
-    "Slug": "uan"
+    "Slug": "uan",
+    "PairedRegion": "uaecentral"
   },
   {
     "Region": "uksouth",
     "DisplayName": "UK South",
-    "Slug": "uks"
+    "Slug": "uks",
+    "PairedRegion": "ukwest"
   },
   {
     "Region": "ukwest",
     "DisplayName": "UK West",
-    "Slug": "ukw"
+    "Slug": "ukw",
+    "PairedRegion": "uksouth"
   },
   {
     "Region": "usdodcentral",
     "DisplayName": "US DoD Central",
-    "Slug": "udc"
+    "Slug": "udc",
+    "PairedRegion": null
   },
   {
     "Region": "usdodeast",
     "DisplayName": "US DoD East",
-    "Slug": "ude"
+    "Slug": "ude",
+    "PairedRegion": null
   },
   {
     "Region": "usgovarizona",
     "DisplayName": "US Gov Arizona",
-    "Slug": "uga"
+    "Slug": "uga",
+    "PairedRegion": null
   },
   {
     "Region": "usgoviowa",
     "DisplayName": "US Gov Iowa",
-    "Slug": "ugi"
+    "Slug": "ugi",
+    "PairedRegion": null
   },
   {
     "Region": "usgovtexas",
     "DisplayName": "US Gov Texas",
-    "Slug": "ugt"
+    "Slug": "ugt",
+    "PairedRegion": null
   },
   {
     "Region": "usgovvirginia",
     "DisplayName": "US Gov Virginia",
-    "Slug": "ugv"
+    "Slug": "ugv",
+    "PairedRegion": null
   },
   {
     "Region": "usnateast",
     "DisplayName": "US Nat East",
-    "Slug": "exe"
+    "Slug": "exe",
+    "PairedRegion": null
   },
   {
     "Region": "usnatwest",
     "DisplayName": "US Nat West",
-    "Slug": "exw"
+    "Slug": "exw",
+    "PairedRegion": null
   },
   {
     "Region": "usseceast",
     "DisplayName": "US Sec East",
-    "Slug": "rxe"
+    "Slug": "rxe",
+    "PairedRegion": null
   },
   {
     "Region": "ussecwest",
     "DisplayName": "US Sec West",
-    "Slug": "rxw"
+    "Slug": "rxw",
+    "PairedRegion": null
   },
   {
     "Region": "westcentralus",
     "DisplayName": "West Central US",
-    "Slug": "wcus"
+    "Slug": "wcus",
+    "PairedRegion": "westus2"
   },
   {
     "Region": "westeurope",
     "DisplayName": "West Europe",
-    "Slug": "we"
+    "Slug": "we",
+    "PairedRegion": "northeurope"
   },
   {
     "Region": "westindia",
     "DisplayName": "West India",
-    "Slug": "inw"
+    "Slug": "inw",
+    "PairedRegion": "southindia"
   },
   {
     "Region": "westus",
     "DisplayName": "West US",
-    "Slug": "wus"
+    "Slug": "wus",
+    "PairedRegion": "eastus"
   },
   {
     "Region": "westus2",
     "DisplayName": "West US 2",
-    "Slug": "wus2"
+    "Slug": "wus2",
+    "PairedRegion": "westcentralus"
   },
   {
     "Region": "westus3",
     "DisplayName": "West US 3",
-    "Slug": "wus3"
+    "Slug": "wus3",
+    "PairedRegion": "eastus"
   }
 ]

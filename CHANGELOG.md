@@ -1,5 +1,9 @@
 # Change Log
 
+## !Deploy
+
+* `Get-CafRegion` now also returns `PairedRegion`, the region's Azure-paired region (`$null` if it doesn't have one), sourced from Microsoft's official [list of Azure regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list) - informational only, `Get-CafResourceName`'s `-Region` doesn't resolve against it.
+
 ## [0.3.0] - 2026-11-01
 
 * Validated `regionDefinition.json` against Microsoft's official [list of Azure regions](https://learn.microsoft.com/en-us/azure/reliability/regions-list): removed entries that don't appear there (`Brazil US`, the retired classic `Germany Central`/`Germany Northeast`, `Jio India Central`/`Jio India West`, `Malaysia South`, `Sweden South`) and added `India South Central`, `Southeast Asia 3` and `Taiwan North`, which it lists but the original data source predated.

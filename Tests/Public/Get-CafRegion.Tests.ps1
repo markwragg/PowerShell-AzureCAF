@@ -48,4 +48,17 @@ Describe 'Get-CafRegion' {
     It 'Returns nothing for a region that does not exist' {
         Get-CafRegion -Region 'doesnotexist' | Should -BeNullOrEmpty
     }
+
+    Context 'PairedRegion' {
+
+        It 'Includes the Azure-paired region when one exists' {
+            $Result = Get-CafRegion -Region 'eastus'
+            $Result.PairedRegion | Should -Be 'westus'
+        }
+
+        It 'Is null for a region that does not have a paired region' {
+            $Result = Get-CafRegion -Region 'swedencentral'
+            $Result.PairedRegion | Should -BeNullOrEmpty
+        }
+    }
 }

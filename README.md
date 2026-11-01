@@ -197,11 +197,16 @@ Get-CafResourceType -ResourceType *storage* | Export-CafResourceType -Path ./sto
 
 ### Discover regions
 
-`Get-CafRegion` is the same kind of local, offline lookup as `Get-CafResourceType`, but for the region abbreviations `-Region` resolves to:
+`Get-CafRegion` is the same kind of local, offline lookup as `Get-CafResourceType`, but for the region abbreviations `-Region` resolves to. It also returns the region's Azure-paired region (`$null` if it doesn't have one - increasingly common for newer regions, which favour availability zones over region pairing for resiliency) - informational only, since `-Region` doesn't resolve against it:
 
 ```powershell
 Get-CafRegion -Region eastus
 Get-CafRegion -Region 'West Europe'
+```
+```text
+Region DisplayName Slug PairedRegion
+------ ----------- ---- ------------
+eastus East US     eus  westus
 ```
 
 ## Data source and maintenance
