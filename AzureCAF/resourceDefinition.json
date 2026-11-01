@@ -110,7 +110,7 @@
   {
     "ResourceType": "Microsoft.Authorization/policyDefinitions",
     "Resource": "Azure Policy definition",
-    "Slug": "policy",
+    "Slug": "<descriptive>",
     "Scope": "subscription",
     "MinLength": 1,
     "MaxLength": 64,
@@ -468,6 +468,18 @@
     "ValidationRegex": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}[a-zA-Z0-9]$"
   },
   {
+    "ResourceType": "Microsoft.CognitiveServices/accounts/projects",
+    "Resource": "Foundry account project",
+    "Slug": "proj",
+    "Scope": "resourceGroup",
+    "MinLength": 3,
+    "MaxLength": 33,
+    "Lowercase": false,
+    "Dashes": true,
+    "InvalidCharsRegex": "[^0-9A-Za-z-]",
+    "ValidationRegex": "^[a-zA-Z0-9-]{3,33}$"
+  },
+  {
     "ResourceType": "Microsoft.Communication/communicationServices",
     "Resource": "Communication Services",
     "Slug": "acs",
@@ -806,6 +818,18 @@
   {
     "ResourceType": "Microsoft.DataProtection/backupVaults",
     "Resource": "Backup vault",
+    "Slug": "bvault",
+    "Scope": "resourceGroup",
+    "MinLength": 2,
+    "MaxLength": 50,
+    "Lowercase": false,
+    "Dashes": true,
+    "InvalidCharsRegex": "[^0-9A-Za-z-]",
+    "ValidationRegex": "^[a-zA-Z][a-zA-Z0-9-]{1,49}$"
+  },
+  {
+    "ResourceType": "Microsoft.DataProtection/backupVaults",
+    "Resource": "Backup Vault name",
     "Slug": "bvault",
     "Scope": "resourceGroup",
     "MinLength": 2,
@@ -2496,6 +2520,18 @@
     "ValidationRegex": "^[a-zA-Z0-9_\\.()-]{1,90}$"
   },
   {
+    "ResourceType": "Microsoft.Resources/templateSpecs",
+    "Resource": "Template specs name",
+    "Slug": "ts",
+    "Scope": "resourceGroup",
+    "MinLength": 1,
+    "MaxLength": 90,
+    "Lowercase": false,
+    "Dashes": true,
+    "InvalidCharsRegex": "[^0-9A-Za-z()._-]",
+    "ValidationRegex": "^[a-zA-Z0-9_\\.()-]{1,90}$"
+  },
+  {
     "ResourceType": "Microsoft.Search/searchServices",
     "Resource": "AI Search",
     "Slug": "srch",
@@ -2690,6 +2726,18 @@
   {
     "ResourceType": "Microsoft.StorageSync/storageSyncServices",
     "Resource": "Storage Sync Service",
+    "Slug": "sss",
+    "Scope": "resourceGroup",
+    "MinLength": 1,
+    "MaxLength": 260,
+    "Lowercase": false,
+    "Dashes": true,
+    "InvalidCharsRegex": "[^0-9A-Za-z ._-]",
+    "ValidationRegex": "^(?!.*[\\.]$)(?!.* $)[a-zA-Z0-9_\\. -]{1,260}$"
+  },
+  {
+    "ResourceType": "Microsoft.StorageSync/storageSyncServices",
+    "Resource": "Storage Sync Service name",
     "Slug": "sss",
     "Scope": "resourceGroup",
     "MinLength": 1,

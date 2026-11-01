@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.2.0
+## [0.2.0] - 2026-11-01
 
 * Added a `-Region` parameter to `Get-CafResourceName` to add a region short-code after the suffix, based on specifying the full region name or display name.
 * Added `Get-CafRegion`, a local/offline lookup of the abbreviation `Get-CafResourceName`'s new `-Region` parameter resolves an Azure region to (e.g. `eastus` -> `eus`, appended after any `-Suffix`), covering 77 regions.

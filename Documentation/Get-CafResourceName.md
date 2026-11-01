@@ -7,9 +7,9 @@ Generates an Azure resource name that follows the Cloud Adoption Framework namin
 
 ```
 Get-CafResourceName [[-ResourceType] <String>] [-Alias <String>] [-Resource <String>] [-Prefix <String[]>]
- [-Suffix <String[]>] [-Separator <String>] [-InstanceNumber <Int32>] [-InstanceNumberPadding <Int32>]
- [-Count <Int32>] [-RandomSuffixLength <Int32>] [-RandomSuffixSeed <Int32>] [-ConventionPath <String>]
- [-NoClean] [-AsObject] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-Suffix <String[]>] [-Region <String>] [-Separator <String>] [-InstanceNumber <Int32>]
+ [-InstanceNumberPadding <Int32>] [-Count <Int32>] [-RandomSuffixLength <Int32>] [-RandomSuffixSeed <Int32>]
+ [-ConventionPath <String>] [-NoClean] [-AsObject] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -66,20 +66,28 @@ Get-CafResourceName -Resource 'Key vault' -Prefix contoso
 
 ### EXAMPLE 5
 ```
+Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
+```
+
+Generates 'contoso-prod-vm-eus' - -Region resolves 'eastus' to its CAF-recommended abbreviation
+the same way -ResourceType resolves to its slug, and appends it after any -Suffix.
+
+### EXAMPLE 6
+```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
 ```
 
 Generates 'contoso-prod-vm-001' - -InstanceNumber is zero-padded to 3 digits by default, matching
 the Cloud Adoption Framework's own example names such as 'vm-sql-test-001'.
 
-### EXAMPLE 6
+### EXAMPLE 7
 ```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
 ```
 
 Generates 'contoso-prod-vm-001', 'contoso-prod-vm-002' and 'contoso-prod-vm-003' in one call.
 
-### EXAMPLE 7
+### EXAMPLE 8
 ```
 Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
 ```
@@ -87,14 +95,14 @@ Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix cont
 Generates a storage account name such as 'contosostabcdef', with 6 random characters appended to
 help ensure the globally-unique name doesn't collide with one that already exists.
 
-### EXAMPLE 8
+### EXAMPLE 9
 ```
 Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
 ```
 
 Generates the same storage account name every time it's run, since the random suffix is seeded.
 
-### EXAMPLE 9
+### EXAMPLE 10
 ```
 Get-CafResourceName -ResourceType Microsoft.Web/sites -Resource 'Function app' -Prefix contoso, prod
 ```
@@ -103,7 +111,7 @@ Generates a function app name.
 -Resource is required here because 'Microsoft.Web/sites' is also
 used for web apps, which use a different abbreviation.
 
-### EXAMPLE 10
+### EXAMPLE 11
 ```
 Get-CafResourceType -Slug kv | Get-CafResourceName -Prefix contoso -RandomSuffixLength 4
 ```
@@ -111,7 +119,7 @@ Get-CafResourceType -Slug kv | Get-CafResourceName -Prefix contoso -RandomSuffix
 Pipes the resource type definition for the 'kv' (Key Vault) abbreviation straight into
 Get-CafResourceName.
 
-### EXAMPLE 11
+### EXAMPLE 12
 ```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso -ConventionPath ./contoso.json
 ```
@@ -120,7 +128,7 @@ Uses -Prefix explicitly, but falls back to whatever -Suffix/-Separator/etc.
 are saved in
 contoso.json (see New-CafResourceNamingConvention) for anything not specified here.
 
-### EXAMPLE 12
+### EXAMPLE 13
 ```
 Import-Csv ./resources.csv | Get-CafResourceName
 ```
@@ -128,7 +136,7 @@ Import-Csv ./resources.csv | Get-CafResourceName
 Batch-generates a name for every row of resources.csv, which needs at least a ResourceType or
 Alias column, and may also have Resource/Prefix/Suffix/Separator/InstanceNumber columns.
 
-### EXAMPLE 13
+### EXAMPLE 14
 ```
 Import-Csv ./resources.csv | Get-CafResourceName -AsObject | Export-Csv ./generated-names.csv
 ```
@@ -234,6 +242,31 @@ value if not specified.
 
 ```yaml
 Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Region
+An Azure region to append to the resource name, as its ARM name (e.g.
+'eastus') or display name
+(e.g.
+'East US') - resolved to the CAF-recommended abbreviation (e.g.
+'eus') the same way
+-ResourceType resolves to -Slug, and added after any -Suffix.
+Use Get-CafRegion to look up the
+abbreviation a given region resolves to, or to see every region the module knows about.
+Region
+abbreviations aren't officially published by Microsoft for every region, so an unrecognized value
+errors rather than guessing - pass the code yourself via -Suffix instead if that happens.
+
+```yaml
+Type: String
 Parameter Sets: (All)
 Aliases:
 
