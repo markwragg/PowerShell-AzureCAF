@@ -9,13 +9,40 @@ A PowerShell module for generating Azure Resource names per the [Cloud Adoption 
 
 ## Installation
 
-The module is published in the PSGallery, so if you have PowerShell 5 or newer can be installed by running:
+The module is published in the PowerShell Gallery, so if you have PowerShell 5 or newer can be installed by running:
 
 ```powershell
 Install-Module AzureCAF
 ```
 
 ## Usage
+
+This module can be used to generate consistent resource names, while ensuring that those names are valid for each specific resource types.
+
+Per the CAF, the recommended naming order is:
+
+```
+{type}-{workload}-{environment}-{region}-{instance}`
+```
+
+Or with company and department added:
+
+```
+{type}-{company}-{department}-{workload}-{environment}-{region}-{instance}
+```
+
+With a hyphen (-) used as a separator for most resources (where permitted).
+
+This module does not prescribe the use of any of the above fields, but provides the following options, allowing you flexibility to define how your naming convention is configured:
+
+- `{type}` - (required) Specified via `-ResourceType`, `-Resource` (sometimes required with `-ResourceType` to avoid ambiguity) or `-Alias` (if you already know the abbreviation (also known as `slug` for the specific resource type).
+- `{separator} - (optional), the character/s to use between each naming segment. `-` by default (except where a resource type does not permit the character). Specify `''` for no separator for all resource types.
+- `{prefix}` - (optional) Specified via `-Prefix`, you can provide one or more strings that will be appended before `{type}`, joined via `{separator}`. This could be company, workload, environment etc.
+- `{suffix}` - (optional) Specified via `-Suffix`, you can provide one or more strings that will be appended after `{type}`, joined via `{separator}`. This could be company, workload, environment etc.
+- `{region}` - (optional) Specified via `-Region`, appends the abbreviation for the specified region after `{suffix}` and before `{instance}`.
+- `{instance}` - (optional) Specified via `-InstanceNumber`, appends a number to the end of the resource name, padded with leading zeros as specified via `-InstanceNumberPadding`, which is set to 3 by default (so a single digit is padded by two zeros).
+
+If you want to append a random string of characters to the end of a resource name (useful where you need to ensure global uniqueness), you can use `-RandomSuffixLength` to define how many characters to append. This will be randomly generated each time the cmdlet is called. If you want the generation to be consistent (but still unique for each resource), provide a value to `-RandomSuffixSeed` and generating a name for the same resource will always generate the same random string (useful if you want a script to be idempotent).
 
 ### Generate a resource name
 

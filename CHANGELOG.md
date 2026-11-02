@@ -1,9 +1,12 @@
 # Change Log
 
+## !Deploy
+
+* [Fix] `New-CafResourceName`/`Get-CafResourceName` now honor a `-ConventionPath` file that saves `Separator` as an empty string (i.e. "no separator" as an org-wide default) - it was previously ignored in favor of the `-Separator` default of `'-'`, since the empty string read back from the file was treated as falsy instead of as an explicitly-set value.
+
 ## [0.7.0] - 2026-11-02
 
 * [Fix] Reverted the 0.5.0 change to `-Region` ordering: it's now inserted after any `-Suffix` again (instead of before it), so `-Suffix` always comes right after the resource type's slug, with `-Region` and then an instance number following after.
-
 
 ## [0.6.0] - 2026-11-02
 

@@ -314,7 +314,7 @@ function New-CafResourceName {
             $EffectiveRegionSlug = $RegionDefinition.Slug
         }
 
-        $EffectiveSeparator = if ($PSBoundParameters.ContainsKey('Separator')) { $Separator } elseif ($Convention.Separator) { $Convention.Separator } else { $Separator }
+        $EffectiveSeparator = if ($PSBoundParameters.ContainsKey('Separator')) { $Separator } elseif ($null -ne $Convention.Separator) { $Convention.Separator } else { $Separator }
         $EffectiveInstanceNumberPadding = if ($PSBoundParameters.ContainsKey('InstanceNumberPadding')) { $InstanceNumberPadding } elseif ($Convention.InstanceNumberPadding) { $Convention.InstanceNumberPadding } else { $InstanceNumberPadding }
         $EffectiveRandomSuffixLength = if ($PSBoundParameters.ContainsKey('RandomSuffixLength')) { $RandomSuffixLength } elseif ($null -ne $Convention.RandomSuffixLength) { $Convention.RandomSuffixLength } else { $RandomSuffixLength }
 

@@ -412,6 +412,14 @@ Describe 'New-CafResourceName' {
                 Should -Be 'fabrikam-vm-01-idq1'
         }
 
+        It 'Honors an empty-string Separator from the convention file instead of falling back to the default' {
+            $NoSeparatorPath = Join-Path $TestDrive 'no-separator-convention.json'
+            @{ Separator = '' } | ConvertTo-Json | Set-Content -Path $NoSeparatorPath
+
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -ConventionPath $NoSeparatorPath).Name |
+                Should -Be 'contosovm'
+        }
+
         It 'Errors clearly when the convention file does not exist' {
             { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath (Join-Path $TestDrive 'missing.json') -ErrorAction Stop } |
                 Should -Throw
