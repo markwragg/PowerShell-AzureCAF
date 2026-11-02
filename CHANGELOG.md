@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.7.0
+## [0.7.0] - 2026-11-02
 
 * [Fix] Reverted the 0.5.0 change to `-Region` ordering: it's now inserted after any `-Suffix` again (instead of before it), so `-Suffix` always comes right after the resource type's slug, with `-Region` and then an instance number following after.
 
