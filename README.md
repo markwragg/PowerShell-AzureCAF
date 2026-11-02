@@ -22,11 +22,11 @@ This module can be used to generate consistent resource names, while ensuring th
 Per the CAF, the recommended naming order is:
 
 
-`{type}`-`{workload}`-`{environment}`-`{region}`-`{instance}`
+- `{type}`-`{workload}`-`{environment}`-`{region}`-`{instance}`
 
 Or with company and department added:
 
-`{type}`-`{company}`-`{department}`-`{workload}`-`{environment}`-`{region}`-`{instance}`
+- `{type}`-`{company}`-`{department}`-`{workload}`-`{environment}`-`{region}`-`{instance}`
 
 With a hyphen (-) used as a separator for most resources (where permitted).
 
