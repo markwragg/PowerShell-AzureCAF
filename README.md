@@ -30,7 +30,7 @@ Or with company and department added:
 
 With a hyphen (-) used as a separator for most resources (where permitted).
 
-This module does not prescribe the use of any of the above fields, but provides the following options, allowing you flexibility to define how your naming convention is configured:
+Except for `{type}`, this module does not prescribe the use of any of the above fields, but provides the following options, allowing you flexibility to define how your naming convention is configured:
 
 | Segment | Parameter/s | Description |
 | --- | --- | --- |
