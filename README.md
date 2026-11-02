@@ -41,7 +41,9 @@ This module does not prescribe the use of any of the above fields, but provides 
 | `{region}` | `‑Region` | Appends the abbreviation for the specified region after `{suffix}` and before `{instance}`. If you want region to appear elsewhere in the order, add it to your `-Prefix` or `-Suffix` arrays instead. |
 | `{instance}` | `‑InstanceNumber` | Appends a number to the end of the resource name, padded with leading zeros as specified via `-InstanceNumberPadding`, which is set to 3 by default (so a single digit is padded by two zeros). |
 
-If you want to append a random string of characters to the end of a resource name (useful where yo‑u need to ensure global uniqueness), you can use `-RandomSuffixLength` to define how many characters to append. This will be randomly generated each time the cmdlet is called. If you want the generation to be consistent (but still unique for each resource), provide a value to `-RandomSuffixSeed` and generating a name for the same resource will always generate the same random string (useful if you want a script to be idempotent).
+If you want to append a random string of characters to the end of a resource name (useful where you need to ensure global uniqueness), you can use `-RandomSuffixLength` to define how many characters to append.
+
+This will be randomly generated each time the cmdlet is called. If you want the generation to be consistent (but still unique for each resource), provide a value to `-RandomSuffixSeed` and generating a name for the same resource will always generate the same random string (useful if you want a script to be idempotent).
 
 ### Generate a resource name
 
