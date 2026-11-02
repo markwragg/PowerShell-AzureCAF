@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.6.0
+## [0.6.0] - 2026-11-02
 
 * [Breaking] Added `New-CafResourceName`, which does the same name generation as `Get-CafResourceName` but always returns the `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object (previously `Get-CafResourceName -AsObject`). `Get-CafResourceName` is now a thin wrapper around it that always returns just the `Name` string - its `-AsObject` switch has been removed, since `New-CafResourceName` covers that case directly.
 
