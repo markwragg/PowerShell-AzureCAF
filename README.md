@@ -5,7 +5,11 @@
 [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/AzureCAF?label=PS%20Gallery)](https://www.powershellgallery.com/packages/AzureCAF)
 [![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/AzureCAF?color=D3D3D3)](https://www.powershellgallery.com/packages/AzureCAF)
 
-A PowerShell module for generating validated Azure Resource names per the [Cloud Adoption Framework naming recommendations](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
+A PowerShell module for generating valid and consistent Azure Resource names per the [Cloud Adoption Framework naming recommendations](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
+
+Use this module as part of PowerShell deployment scripts to generate suitable names for resource, or as part of pre-planning work to prepare resource names in advance, ensuring that each resource name is valid for the type of resource being deployed (giving consideration to valid characters, casing and length).
+
+See the [Examples](/Examples/) folder for sample usage scripts.
 
 ## Installation
 
