@@ -67,9 +67,9 @@ Describe 'New-CafResourceName' {
 
     Context 'Region' {
 
-        It 'Resolves a region to its abbreviation and inserts it before any suffix' {
+        It 'Resolves a region to its abbreviation and inserts it after any suffix' {
             (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Suffix '01' -Region 'eastus').Name |
-                Should -Be 'contoso-vm-eus-01'
+                Should -Be 'contoso-vm-01-eus'
         }
 
         It 'Resolves a region given by display name' {

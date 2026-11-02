@@ -49,8 +49,8 @@ function New-CafResourceName {
     .PARAMETER Region
         An Azure region to append to the resource name, as its ARM name (e.g. 'eastus'), display name
         (e.g. 'East US') or its CAF slug (e.g. 'eus') - resolved to the CAF-recommended abbreviation the
-        same way -ResourceType resolves to -Slug, and inserted after the resource type's slug but before
-        any -Suffix, so a -Suffix you specify is always the last segment (aside from an instance number).
+        same way -ResourceType resolves to -Slug, and inserted after any -Suffix but before an instance
+        number, so a -Suffix you specify always comes right after the resource type's slug.
         Already passing the slug in is a no-op that just confirms it's a recognized one. Falls back to
         -ConventionPath's value if not specified. Use Get-CafRegion to look up the abbreviation a given
         region resolves to, or to see every region the module knows about. Region abbreviations aren't
@@ -122,8 +122,8 @@ function New-CafResourceName {
         New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
 
         Generates 'contoso-prod-vm-eus' - -Region resolves 'eastus' to its CAF-recommended abbreviation
-        the same way -ResourceType resolves to its slug, and inserts it before any -Suffix, so -Suffix
-        stays the last segment.
+        the same way -ResourceType resolves to its slug, and inserts it after any -Suffix, so -Suffix
+        always comes right after the resource type's slug.
     .EXAMPLE
         New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
 
@@ -376,7 +376,7 @@ function New-CafResourceName {
             return
         }
 
-        $resourceArr = @($CleanPrefix) + @($definition.Slug) + @($CleanRegionSlug) + @($CleanSuffix) | Where-Object { $_ }
+        $resourceArr = @($CleanPrefix) + @($definition.Slug) + @($CleanSuffix) + @($CleanRegionSlug) | Where-Object { $_ }
 
         $resourceName = $resourceArr -join $ActualSeparator
         Write-Verbose "Joined '$($resourceArr -join "', '")' with separator '$ActualSeparator' -> '$resourceName' ($($resourceName.Length) characters)."

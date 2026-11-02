@@ -1,5 +1,10 @@
 # Change Log
 
+## !Deploy 0.7.0
+
+* [Fix] Reverted the 0.5.0 change to `-Region` ordering: it's now inserted after any `-Suffix` again (instead of before it), so `-Suffix` always comes right after the resource type's slug, with `-Region` and then an instance number following after.
+
+
 ## [0.6.0] - 2026-11-02
 
 * [Breaking] Added `New-CafResourceName`, which does the same name generation as `Get-CafResourceName` but always returns the `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object (previously `Get-CafResourceName -AsObject`). `Get-CafResourceName` is now a thin wrapper around it that always returns just the `Name` string - its `-AsObject` switch has been removed, since `New-CafResourceName` covers that case directly.
