@@ -37,7 +37,7 @@ This module does not prescribe the use of any of the above fields, but provides 
 
 | Segment | Parameter/s | Description |
 | --- | --- | --- |
-| `{type}` | `-ResourceType`, `-Resource` or `-Alias` | (Required) The ARM resource type's CAF abbreviation (also known as `slug`). `-Resource` is sometimes required alongside `-ResourceType` to avoid ambiguity; `-Alias` is a shorter alternative if you already know the abbreviation. |
+| `{type}` | `-ResourceType`<br>`-Resource`<br>`-Alias` | (Required) The ARM resource type's CAF abbreviation (also known as `slug`). `-Resource` is sometimes required alongside `-ResourceType` to avoid ambiguity; `-Alias` is a shorter alternative if you already know the abbreviation. |
 | `{separator}` | `-Separator` | The character(s) to use between each naming segment. `-` by default (except where a resource type does not permit the character). Specify `''` for no separator at all. |
 | `{prefix}` | `-Prefix` | One or more strings appended before `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
 | `{suffix}` | `-Suffix` | One or more strings appended after `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
