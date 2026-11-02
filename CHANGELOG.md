@@ -1,5 +1,9 @@
 # Change Log
 
+## !Deploy 0.6.0
+
+* [Breaking] Added `New-CafResourceName`, which does the same name generation as `Get-CafResourceName` but always returns the `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object (previously `Get-CafResourceName -AsObject`). `Get-CafResourceName` is now a thin wrapper around it that always returns just the `Name` string - its `-AsObject` switch has been removed, since `New-CafResourceName` covers that case directly.
+
 ## [0.5.0] - 2026-11-01
 
 * [Fix] `Get-CafResourceName`'s `-Region` segment is now inserted after the resource type's slug but before any `-Suffix`, instead of after it, so `-Suffix` is always the last segment (aside from an instance number) as users of CAF naming conventions expect.

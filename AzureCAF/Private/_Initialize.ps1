@@ -78,7 +78,7 @@ $RegionCompleter = {
         ForEach-Object { [System.Management.Automation.CompletionResult]::new($_.Region, "$($_.Region) ($($_.DisplayName))", 'ParameterValue', $_.DisplayName) }
 }
 
-Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'ResourceType' -ScriptBlock $ResourceTypeCompleter
-Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Alias' -ScriptBlock $SlugCompleter
-Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Resource' -ScriptBlock $ResourceCompleter
-Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'Get-CafRegion' -ParameterName 'Region' -ScriptBlock $RegionCompleter
+Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'ResourceType' -ScriptBlock $ResourceTypeCompleter
+Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Alias' -ScriptBlock $SlugCompleter
+Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Resource' -ScriptBlock $ResourceCompleter
+Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Get-CafRegion' -ParameterName 'Region' -ScriptBlock $RegionCompleter

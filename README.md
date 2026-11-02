@@ -19,7 +19,7 @@ Install-Module AzureCAF
 
 ### Generate a resource name
 
-`Get-CafResourceName` builds a name from an optional prefix, the CAF-recommended abbreviation for an Azure resource type, and an optional suffix - checking the result against that resource type's length limit and allowed characters along the way.
+`Get-CafResourceName` builds a name from an optional prefix, the CAF-recommended abbreviation for an Azure resource type, and an optional suffix - checking the result against that resource type's length limit and allowed characters along the way. It's a thin wrapper around `New-CafResourceName` that returns just the name as a string; use `New-CafResourceName` directly if you want the `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object instead (see the batch-generation example below).
 
 ```powershell
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Suffix 01
@@ -107,10 +107,10 @@ contoso-kv
 Import-Csv ./resources.csv | Get-CafResourceName
 ```
 
-Batch-generating like this returns bare strings, which lose track of which input row (or which `-Count` iteration) produced which name. Add `-AsObject` to get back `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` instead - handy for exporting alongside the values that produced each name:
+Batch-generating like this returns bare strings, which lose track of which input row (or which `-Count` iteration) produced which name. Use `New-CafResourceName` instead to get back a `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object - handy for exporting alongside the values that produced each name:
 
 ```powershell
-Import-Csv ./resources.csv | Get-CafResourceName -AsObject | Export-Csv ./generated-names.csv
+Import-Csv ./resources.csv | New-CafResourceName | Export-Csv ./generated-names.csv
 ```
 
 Add `-Verbose` to see the length-budget reasoning behind a result (reserved segments, trimming decisions):

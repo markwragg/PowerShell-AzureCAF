@@ -1,20 +1,18 @@
 function Get-CafResourceName {
     <#
     .SYNOPSIS
-        Generates an Azure resource name that follows the Cloud Adoption Framework naming convention.
+        Generates an Azure resource name that follows the Cloud Adoption Framework naming convention,
+        returning just the name as a string.
     .DESCRIPTION
-        Builds a resource name from an optional prefix, the Cloud Adoption Framework recommended
-        abbreviation for the given Azure resource type, and an optional suffix. The result is checked
-        against the resource type's length limit and allowed characters, and is trimmed and/or converted
-        to lowercase automatically if the resource type requires it.
+        A thin wrapper around New-CafResourceName that returns just the generated Name string, for
+        callers who don't need the ResourceType/Resource/Slug/InstanceNumber/RandomSuffix that produced
+        it. Every parameter here behaves exactly as it does on New-CafResourceName - see its help for
+        the full description of each one, the length-budget/trimming/cleaning behaviour, and
+        -ConventionPath support.
 
-        Accepts pipeline input by property name, so a list of resource specs (e.g. imported from a CSV
-        or a PSD1 describing a whole deployment) can be piped straight through to generate every name
-        for a project in one batch - see the pipeline example below.
-
-        Use Get-CafResourceType to discover the ResourceType/Resource values this cmdlet accepts. Use
-        -Verbose to see the length-budget reasoning (reserved segments, trimming decisions) behind a
-        given result.
+        Use New-CafResourceName directly instead if you need to tell generated names apart when
+        batch-generating across different resource types and/or -Count, or to export the result (e.g.
+        to CSV) alongside the values that produced it.
     .PARAMETER ResourceType
         The ARM resource type to generate a name for, e.g. 'Microsoft.Compute/virtualMachines'. Matches
         as a substring by default, so 'virtualMachines' also works - as long as it narrows down to a
@@ -93,12 +91,6 @@ function Get-CafResourceName {
         By default, characters that aren't valid for the given resource type are stripped from -Prefix
         and -Suffix before the name is built. Specify -NoClean to pass them through unmodified instead
         (the generated name will then fail validation if it contains invalid characters).
-    .PARAMETER AsObject
-        Returns an object with Name, ResourceType, Resource, Slug, InstanceNumber and RandomSuffix
-        properties instead of just the name string - useful for telling generated names apart when
-        batch-generating across different resource types and/or -Count, or for exporting the result
-        (e.g. to CSV) alongside the values that produced it. InstanceNumber/RandomSuffix are $null when
-        -InstanceNumber/-Count or -RandomSuffixLength weren't in play for that name.
     .EXAMPLE
         Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Suffix 01
 
@@ -163,12 +155,6 @@ function Get-CafResourceName {
 
         Batch-generates a name for every row of resources.csv, which needs at least a ResourceType or
         Alias column, and may also have Resource/Prefix/Suffix/Separator/InstanceNumber columns.
-    .EXAMPLE
-        Import-Csv ./resources.csv | Get-CafResourceName -AsObject | Export-Csv ./generated-names.csv
-
-        -AsObject keeps the ResourceType/Resource/Slug/InstanceNumber/RandomSuffix that produced each
-        name alongside it, rather than returning bare strings that lose track of which input row (or
-        which -Count iteration) each one came from.
     .LINK
         https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
     #>
@@ -235,219 +221,32 @@ function Get-CafResourceName {
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [switch]
-        $NoClean,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [switch]
-        $AsObject
+        $NoClean
     )
 
     begin {
-        function Get-CleanString {
-            param (
-                [string[]]$InputObject,
-                [string]$Pattern
-            )
+        # Every parameter above exists only to be bound and forwarded to New-CafResourceName via the
+        # proxy-command plumbing below (for CmdletBinding/tab-completion/help purposes), never read
+        # directly here - this satisfies PSScriptAnalyzer's PSReviewUnusedParameter rule.
+        $null = $ResourceType, $Alias, $Resource, $Prefix, $Suffix, $Region, $Separator, $InstanceNumber,
+        $InstanceNumberPadding, $Count, $RandomSuffixLength, $RandomSuffixSeed, $ConventionPath, $NoClean
 
-            foreach ($Str in $InputObject) {
-                $Str -replace $Pattern, ''
-            }
-        }
-
-        function Get-TrimString {
-            param (
-                [string]$InputObject,
-                [int]$MaxLength
-            )
-
-            if ($InputObject.Length -gt $MaxLength) {
-                $InputObject.Substring(0, $MaxLength)
-            }
-            else {
-                $InputObject
-            }
-        }
-
-        $Convention = $null
-        if ($ConventionPath) {
-            if (-not (Test-Path -Path $ConventionPath -PathType Leaf)) {
-                $PSCmdlet.ThrowTerminatingError(
-                    [System.Management.Automation.ErrorRecord]::new(
-                        [System.IO.FileNotFoundException]::new("Naming convention file not found: '$ConventionPath'."),
-                        'ConventionFileNotFound',
-                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-                        $ConventionPath
-                    )
-                )
-            }
-
-            try {
-                $Convention = Get-Content -Path $ConventionPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-                Write-Verbose "Loaded naming convention from '$ConventionPath'."
-            }
-            catch {
-                $PSCmdlet.ThrowTerminatingError($_)
-            }
-        }
+        # A hand-rolled `New-CafResourceName @PSBoundParameters` here would be unsafe: $PSBoundParameters
+        # keeps stale values from a previous pipeline object once a later object lacks that property (a
+        # known PowerShell quirk), which would leak e.g. one row's -Suffix into the next row's call. The
+        # proxy-command pattern below instead feeds each pipeline object into New-CafResourceName's own
+        # pipeline binding, which rebinds correctly per object.
+        $WrappedCommand = $ExecutionContext.InvokeCommand.GetCommand('New-CafResourceName', [System.Management.Automation.CommandTypes]::Function)
+        $ScriptCmd = { & $WrappedCommand @PSBoundParameters | ForEach-Object Name }
+        $SteppablePipeline = $ScriptCmd.GetSteppablePipeline($MyInvocation.CommandOrigin)
+        $SteppablePipeline.Begin($PSCmdlet)
     }
 
     process {
-        if (-not $ResourceType -and -not $Alias -and -not $Resource) {
-            Write-Error 'Specify -ResourceType, -Alias or -Resource to identify the resource type.'
-            return
-        }
+        $SteppablePipeline.Process($_)
+    }
 
-        $definition = Resolve-CafResourceDefinition -ResourceType $ResourceType -Alias $Alias -Resource $Resource
-
-        if (-not $definition) {
-            return
-        }
-
-        Write-Verbose "Resolved to $($definition.ResourceType) [$($definition.Resource)] (slug '$($definition.Slug)', max length $($definition.MaxLength), dashes $($definition.Dashes), lowercase $($definition.Lowercase))."
-
-        $EffectivePrefix = if ($PSBoundParameters.ContainsKey('Prefix')) { $Prefix } else { $Convention.Prefix }
-        $EffectiveSuffix = if ($PSBoundParameters.ContainsKey('Suffix')) { $Suffix } else { $Convention.Suffix }
-
-        $EffectiveRegion = if ($PSBoundParameters.ContainsKey('Region')) { $Region } else { $Convention.Region }
-
-        if ($EffectiveRegion) {
-            $RegionDefinition = Resolve-CafRegion -Region $EffectiveRegion
-
-            if (-not $RegionDefinition) {
-                return
-            }
-
-            Write-Verbose "Resolved region '$EffectiveRegion' to '$($RegionDefinition.Region)' (slug '$($RegionDefinition.Slug)')."
-            $EffectiveRegionSlug = $RegionDefinition.Slug
-        }
-
-        $EffectiveSeparator = if ($PSBoundParameters.ContainsKey('Separator')) { $Separator } elseif ($Convention.Separator) { $Convention.Separator } else { $Separator }
-        $EffectiveInstanceNumberPadding = if ($PSBoundParameters.ContainsKey('InstanceNumberPadding')) { $InstanceNumberPadding } elseif ($Convention.InstanceNumberPadding) { $Convention.InstanceNumberPadding } else { $InstanceNumberPadding }
-        $EffectiveRandomSuffixLength = if ($PSBoundParameters.ContainsKey('RandomSuffixLength')) { $RandomSuffixLength } elseif ($null -ne $Convention.RandomSuffixLength) { $Convention.RandomSuffixLength } else { $RandomSuffixLength }
-
-        if ($EffectiveInstanceNumberPadding -lt 1 -or $EffectiveInstanceNumberPadding -gt 10) {
-            Write-Error "InstanceNumberPadding from the naming convention must be between 1 and 10, but was $EffectiveInstanceNumberPadding."
-            return
-        }
-
-        if ($EffectiveRandomSuffixLength -lt 0 -or $EffectiveRandomSuffixLength -gt 24) {
-            Write-Error "RandomSuffixLength from the naming convention must be between 0 and 24, but was $EffectiveRandomSuffixLength."
-            return
-        }
-
-        if ($NoClean) {
-            $CleanPrefix = $EffectivePrefix
-            $CleanSuffix = $EffectiveSuffix
-            $CleanRegionSlug = $EffectiveRegionSlug
-        }
-        else {
-            $CleanPrefix = Get-CleanString -InputObject $EffectivePrefix -Pattern $definition.InvalidCharsRegex
-            $CleanSuffix = Get-CleanString -InputObject $EffectiveSuffix -Pattern $definition.InvalidCharsRegex
-            $CleanRegionSlug = Get-CleanString -InputObject $EffectiveRegionSlug -Pattern $definition.InvalidCharsRegex
-        }
-
-        $ActualSeparator = if ($definition.Dashes) { $EffectiveSeparator } else { '' }
-
-        $HasInstanceNumber = $PSBoundParameters.ContainsKey('InstanceNumber') -or $Count -gt 1
-        $StartInstanceNumber = if ($PSBoundParameters.ContainsKey('InstanceNumber')) { $InstanceNumber } else { 1 }
-        $EndInstanceNumber = $StartInstanceNumber + $Count - 1
-
-        # Reserve space based on the longest instance number in the sequence, so the trimmed base name
-        # (prefix/slug/region/suffix) is the same length for every generated name, not just the first one.
-        $InstanceSegment = if ($HasInstanceNumber) { $EndInstanceNumber.ToString().PadLeft($EffectiveInstanceNumberPadding, '0') } else { $null }
-
-        $reservedLength = 0
-        $reservedDescriptions = @()
-
-        if ($InstanceSegment) {
-            $reservedLength += $InstanceSegment.Length + $ActualSeparator.Length
-            $reservedDescriptions += 'the instance number'
-        }
-
-        if ($EffectiveRandomSuffixLength -gt 0) {
-            $reservedLength += $EffectiveRandomSuffixLength + $ActualSeparator.Length
-            $reservedDescriptions += 'the random suffix'
-        }
-
-        $mainBudget = $definition.MaxLength - $reservedLength
-
-        if ($reservedDescriptions.Count -gt 0) {
-            Write-Verbose "Reserving $reservedLength character(s) for $($reservedDescriptions -join ' and '); $mainBudget of $($definition.MaxLength) remain for the prefix/slug/region/suffix."
-        }
-        else {
-            Write-Verbose "No reserved segments; the full $mainBudget character limit is available for the prefix/slug/region/suffix."
-        }
-
-        if ($mainBudget -lt $definition.Slug.Length) {
-            Write-Error "Not enough room within the $($definition.MaxLength) character limit for $($definition.ResourceType): '$($definition.Slug)' needs $($definition.Slug.Length) characters, but only $mainBudget are available after reserving space for $($reservedDescriptions -join ' and ')."
-            return
-        }
-
-        $resourceArr = @($CleanPrefix) + @($definition.Slug) + @($CleanRegionSlug) + @($CleanSuffix) | Where-Object { $_ }
-
-        $resourceName = $resourceArr -join $ActualSeparator
-        Write-Verbose "Joined '$($resourceArr -join "', '")' with separator '$ActualSeparator' -> '$resourceName' ($($resourceName.Length) characters)."
-
-        if ($resourceName.Length -gt $mainBudget) {
-            $beforeTrimLength = $resourceName.Length
-            $resourceName = Get-TrimString -InputObject $resourceName -MaxLength $mainBudget
-            $reservedNote = if ($reservedDescriptions.Count -gt 0) { " (after reserving space for $($reservedDescriptions -join ' and '))" } else { '' }
-            Write-Warning "Resource name has been trimmed to $mainBudget characters due to the $($definition.MaxLength) character max length restriction$reservedNote."
-            Write-Verbose "Trimmed from $beforeTrimLength to $mainBudget characters -> '$resourceName'."
-        }
-
-        # A single shared Random, created once per pipeline item rather than per generated name, so a
-        # -RandomSuffixSeed produces a reproducible sequence of distinct suffixes across the whole -Count batch.
-        $Random = if ($EffectiveRandomSuffixLength -gt 0) {
-            if ($PSBoundParameters.ContainsKey('RandomSuffixSeed')) { [System.Random]::new($RandomSuffixSeed) } else { [System.Random]::new() }
-        }
-        else {
-            $null
-        }
-        $CharPool = 'abcdefghijklmnopqrstuvwxyz0123456789'
-
-        for ($InstanceCounter = $StartInstanceNumber; $InstanceCounter -le $EndInstanceNumber; $InstanceCounter++) {
-            $FinalName = $resourceName
-
-            if ($HasInstanceNumber) {
-                $CurrentInstanceSegment = $InstanceCounter.ToString().PadLeft($EffectiveInstanceNumberPadding, '0')
-                $FinalName = $FinalName + $ActualSeparator + $CurrentInstanceSegment
-                Write-Verbose "Appended instance segment '$CurrentInstanceSegment' -> '$FinalName'."
-            }
-
-            if ($EffectiveRandomSuffixLength -gt 0) {
-                # Always lowercase alphanumeric, even for resource types that allow uppercase - the
-                # random suffix exists for uniqueness, not communication, and 36^RandomSuffixLength is
-                # already far more entropy than a uniqueness suffix needs.
-                $RandomSuffix = -join (1..$EffectiveRandomSuffixLength | ForEach-Object { $CharPool[$Random.Next($CharPool.Length)] })
-                $FinalName = $FinalName + $ActualSeparator + $RandomSuffix
-                Write-Verbose "Appended random suffix '$RandomSuffix' -> '$FinalName'."
-            }
-
-            if ($definition.Lowercase -and $FinalName -cmatch '[A-Z]') {
-                $FinalName = $FinalName.ToLower()
-                Write-Warning 'Resource name has been converted to lower case due to naming requirement.'
-                Write-Verbose "Converted to lowercase -> '$FinalName'."
-            }
-
-            if ($FinalName -notmatch $definition.ValidationRegex) {
-                Write-Error "The generated name '$FinalName' is not valid for $($definition.ResourceType) (pattern: $($definition.ValidationRegex))."
-            }
-            elseif ($AsObject) {
-                Write-Verbose "Final result: '$FinalName'."
-                [pscustomobject]@{
-                    Name           = $FinalName
-                    ResourceType   = $definition.ResourceType
-                    Resource       = $definition.Resource
-                    Slug           = $definition.Slug
-                    InstanceNumber = if ($HasInstanceNumber) { $InstanceCounter } else { $null }
-                    RandomSuffix   = if ($EffectiveRandomSuffixLength -gt 0) { $RandomSuffix } else { $null }
-                }
-            }
-            else {
-                Write-Verbose "Final result: '$FinalName'."
-                $FinalName
-            }
-        }
+    end {
+        $SteppablePipeline.End()
     }
 }

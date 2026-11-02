@@ -1,7 +1,8 @@
 # Get-CafResourceName
 
 ## SYNOPSIS
-Generates an Azure resource name that follows the Cloud Adoption Framework naming convention.
+Generates an Azure resource name that follows the Cloud Adoption Framework naming convention,
+returning just the name as a string.
 
 ## SYNTAX
 
@@ -9,25 +10,20 @@ Generates an Azure resource name that follows the Cloud Adoption Framework namin
 Get-CafResourceName [[-ResourceType] <String>] [-Alias <String>] [-Resource <String>] [-Prefix <String[]>]
  [-Suffix <String[]>] [-Region <String>] [-Separator <String>] [-InstanceNumber <Int32>]
  [-InstanceNumberPadding <Int32>] [-Count <Int32>] [-RandomSuffixLength <Int32>] [-RandomSuffixSeed <Int32>]
- [-ConventionPath <String>] [-NoClean] [-AsObject] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-ConventionPath <String>] [-NoClean] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Builds a resource name from an optional prefix, the Cloud Adoption Framework recommended
-abbreviation for the given Azure resource type, and an optional suffix.
-The result is checked
-against the resource type's length limit and allowed characters, and is trimmed and/or converted
-to lowercase automatically if the resource type requires it.
+A thin wrapper around New-CafResourceName that returns just the generated Name string, for
+callers who don't need the ResourceType/Resource/Slug/InstanceNumber/RandomSuffix that produced
+it.
+Every parameter here behaves exactly as it does on New-CafResourceName - see its help for
+the full description of each one, the length-budget/trimming/cleaning behaviour, and
+-ConventionPath support.
 
-Accepts pipeline input by property name, so a list of resource specs (e.g.
-imported from a CSV
-or a PSD1 describing a whole deployment) can be piped straight through to generate every name
-for a project in one batch - see the pipeline example below.
-
-Use Get-CafResourceType to discover the ResourceType/Resource values this cmdlet accepts.
-Use
--Verbose to see the length-budget reasoning (reserved segments, trimming decisions) behind a
-given result.
+Use New-CafResourceName directly instead if you need to tell generated names apart when
+batch-generating across different resource types and/or -Count, or to export the result (e.g.
+to CSV) alongside the values that produced it.
 
 ## EXAMPLES
 
@@ -136,15 +132,6 @@ Import-Csv ./resources.csv | Get-CafResourceName
 
 Batch-generates a name for every row of resources.csv, which needs at least a ResourceType or
 Alias column, and may also have Resource/Prefix/Suffix/Separator/InstanceNumber columns.
-
-### EXAMPLE 14
-```
-Import-Csv ./resources.csv | Get-CafResourceName -AsObject | Export-Csv ./generated-names.csv
-```
-
--AsObject keeps the ResourceType/Resource/Slug/InstanceNumber/RandomSuffix that produced each
-name alongside it, rather than returning bare strings that lose track of which input row (or
-which -Count iteration) each one came from.
 
 ## PARAMETERS
 
@@ -432,27 +419,6 @@ By default, characters that aren't valid for the given resource type are strippe
 and -Suffix before the name is built.
 Specify -NoClean to pass them through unmodified instead
 (the generated name will then fail validation if it contains invalid characters).
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -AsObject
-Returns an object with Name, ResourceType, Resource, Slug, InstanceNumber and RandomSuffix
-properties instead of just the name string - useful for telling generated names apart when
-batch-generating across different resource types and/or -Count, or for exporting the result
-(e.g.
-to CSV) alongside the values that produced it.
-InstanceNumber/RandomSuffix are $null when
--InstanceNumber/-Count or -RandomSuffixLength weren't in play for that name.
 
 ```yaml
 Type: SwitchParameter
