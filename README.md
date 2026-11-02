@@ -37,12 +37,12 @@ This module does not prescribe the use of any of the above fields, but provides 
 
 | Segment | Required? | Parameter | Description |
 | --- | --- | --- | --- |
-| `{type}` | Required | `-ResourceType`, `-Resource` or `-Alias` | The ARM resource type's CAF abbreviation (also known as `slug`). `-Resource` is sometimes required alongside `-ResourceType` to avoid ambiguity; `-Alias` is a shorter alternative if you already know the abbreviation. |
-| `{separator}` | Optional | `-Separator` | The character(s) to use between each naming segment. `-` by default (except where a resource type does not permit the character). Specify `''` for no separator at all. |
-| `{prefix}` | Optional | `-Prefix` | One or more strings appended before `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
-| `{suffix}` | Optional | `-Suffix` | One or more strings appended after `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
-| `{region}` | Optional | `-Region` | Appends the abbreviation for the specified region after `{suffix}` and before `{instance}`. |
-| `{instance}` | Optional | `-InstanceNumber` | Appends a number to the end of the resource name, padded with leading zeros as specified via `-InstanceNumberPadding`, which is set to 3 by default (so a single digit is padded by two zeros). |
+| `{type}` | Y | `-ResourceType`, `-Resource` or `-Alias` | The ARM resource type's CAF abbreviation (also known as `slug`). `-Resource` is sometimes required alongside `-ResourceType` to avoid ambiguity; `-Alias` is a shorter alternative if you already know the abbreviation. |
+| `{separator}` | N | `-Separator` | The character(s) to use between each naming segment. `-` by default (except where a resource type does not permit the character). Specify `''` for no separator at all. |
+| `{prefix}` | N | `-Prefix` | One or more strings appended before `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
+| `{suffix}` | N | `-Suffix` | One or more strings appended after `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
+| `{region}` | N | `-Region` | Appends the abbreviation for the specified region after `{suffix}` and before `{instance}`. |
+| `{instance}` | N | `-InstanceNumber` | Appends a number to the end of the resource name, padded with leading zeros as specified via `-InstanceNumberPadding`, which is set to 3 by default (so a single digit is padded by two zeros). |
 
 If you want to append a random string of characters to the end of a resource name (useful where you need to ensure global uniqueness), you can use `-RandomSuffixLength` to define how many characters to append. This will be randomly generated each time the cmdlet is called. If you want the generation to be consistent (but still unique for each resource), provide a value to `-RandomSuffixSeed` and generating a name for the same resource will always generate the same random string (useful if you want a script to be idempotent).
 
