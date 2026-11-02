@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy
+## [0.7.5] - 2026-11-02
 
 * [Fix] `New-CafResourceName`/`Get-CafResourceName` now honor a `-ConventionPath` file that saves `Separator` as an empty string (i.e. "no separator" as an org-wide default) - it was previously ignored in favor of the `-Separator` default of `'-'`, since the empty string read back from the file was treated as falsy instead of as an explicitly-set value.
 
