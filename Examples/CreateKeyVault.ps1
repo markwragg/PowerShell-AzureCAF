@@ -38,7 +38,7 @@ $ConventionPath = $NamingConvention.FullName
 
 # Generate Resource Group Name, Key Vault Name, and Storage Account Name using the naming convention
 
-$rgName = Get-CafResourceName -ResourceType 'Microsoft.Resources/resourceGroups' -ConventionPath $NamingConvention.Path
+$rgName = Get-CafResourceName -ResourceType 'Microsoft.Resources/resourceGroups' -ConventionPath $ConventionPath
 $kvName = Get-CafResourceName -ResourceType 'Microsoft.KeyVault/vaults' -ConventionPath $ConventionPath
 
 $kvStorage = @{
