@@ -21,3 +21,5 @@ $rgName = Get-CafResourceName -ResourceType 'Microsoft.Resources/resourceGroups'
 
 $rgName
 # rg-contoso-dev-eus
+
+New-AzResourceGroup -Name $rgName -Location $region
