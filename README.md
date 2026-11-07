@@ -7,7 +7,12 @@
 
 A PowerShell module for generating valid and consistent Azure Resource names per the [Cloud Adoption Framework naming recommendations](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
 
-Use this module as part of PowerShell deployment scripts to generate suitable names for resource, or as part of pre-planning work to prepare resource names in advance, ensuring that each resource name is valid for the type of resource being deployed (giving consideration to valid characters, casing and length).
+1. Generates consistent, informative resource names that align with CAF best practice.
+2. Fails fast should you attempt to use an invalid resource name.
+3. Corrects some resource names by default, e.g does not attempt to create Storage accounts with invalid characters.
+4. Appends a random string suffix when required (to ensure global uniqueness) and can do so in an idempotent way.
+
+Use this module as part of PowerShell deployment scripts to generate suitable names for resources, or as part of pre-planning work to prepare resource names in advance, ensuring that each resource name is valid for the type of resource being deployed (giving consideration to valid characters, casing and length).
 
 See the [Examples](/Examples/) folder for sample usage scripts.
 
@@ -17,6 +22,12 @@ The module is published in the PowerShell Gallery, so if you have PowerShell 5 o
 
 ```powershell
 Install-Module AzureCAF
+```
+
+Or
+
+```powershell
+Install-PSResource AzureCAF
 ```
 
 ## Usage
@@ -45,54 +56,93 @@ Except for `{type}`, this module does not prescribe the use of any of the above 
 | `{region}` | `‑Region` | Appends the abbreviation for the specified region after `{suffix}` and before `{instance}`. If you want region to appear elsewhere in the order, add it to your `-Prefix` or `-Suffix` arrays instead. |
 | `{instance}` | `‑InstanceNumber` | Appends a number to the end of the resource name, padded with leading zeros as specified via `-InstanceNumberPadding`, which is set to 3 by default (so a single digit is padded by two zeros). |
 
-If you want to append a random string of characters to the end of a resource name (useful where you need to ensure global uniqueness), you can use `-RandomSuffixLength` to define how many characters to append.
+If you want to append a random string of characters to the end of a resource name (useful where you need to ensure global uniqueness), you can use `-RandomSuffixLength` (Alias: `-Rsl`) to define how many characters to append.
 
-This will be randomly generated each time the cmdlet is called. If you want the generation to be consistent (but still unique for each resource), provide a value to `-RandomSuffixSeed` and generating a name for the same resource will always generate the same random string (useful if you want a script to be idempotent).
+By default, this will be randomly generated each time the cmdlet is called. If you want the random string to be consistent (but still unique for each resource), provide a value to `-RandomSuffixSeed` (Alias: `-Rss`) and when generating a name for the same resource, the module will always generate the same random string (this is useful if you want a script to be idempotent, i.e: the same resources are created wit hthe same names every time).
 
 ### Generate a resource name
 
-`Get-CafResourceName` builds a name from an optional prefix, the CAF-recommended abbreviation for an Azure resource type, and an optional suffix - checking the result against that resource type's length limit and allowed characters along the way. It's a thin wrapper around `New-CafResourceName` that returns just the name as a string; use `New-CafResourceName` directly if you want the `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object instead (see the batch-generation example below).
+`Get-CafResourceName` builds a name by combining zero or more prefixes, the CAF-recommended abbreviation for an Azure resource type, zero or more suffixes, an optional instance number and random string - checking the result against that resource type's length limit and allowed characters along the way. `Get-CafResourceName` returns only the resource name, as a string. Use `New-CafResourceName` to return a PowerShell object with `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` properties instead (see the batch-generation example below).
+
+The default parameter to identify the resource is `-ResourceType`:
 
 ```powershell
-Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -Suffix 01
+Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Suffix contoso,prod
 ```
 ```text
-contoso-prod-vm-01
+vm-contoso-prod
 ```
 
-`-InstanceNumber` is zero-padded to 3 digits by default:
+Because this is the default parameter, you can exclude it:
 
 ```powershell
-Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
+Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod
 ```
 ```text
-contoso-prod-vm-001
+vm-contoso-prod
 ```
 
-`-RandomSuffixLength` appends random characters for scenarios that need a globally-unique name:
+Use `-InstanceNumber` to append a number to the end of the resource name (zero-padded to 3 digits by default):
 
 ```powershell
-Get-CafResourceName Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
+Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod -InstanceNumber 1
+```
+```text
+vm-contoso-prod-001
+```
+
+Use `-InstanceNumberPadding` to specify a different number of leading zeros:
+
+```powershell
+Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod -InstanceNumber 1 -InstanceNumberPadding 2
+```
+```text
+vm-contoso-prod-01
+```
+
+Some resources use the same base resource type identifier, so must be distinguished by also providing `-Resource`. For example:
+
+```powershell
+Get-CafResourceName Microsoft.Web/sites -Suffix contoso,prod
+```
+```text
+Write-Error: 'Microsoft.Web/sites' matches more than one resource type. Narrow it down with -Resource:
+'Microsoft.Web/sites [Function app]','Microsoft.Web/sites [Web app]'.
+```
+```powershell
+Get-CafResourceName Microsoft.Web/sites -Resource 'Web app' -Suffix contoso,prod
+```
+```text
+app-contoso-prod
+```
+
+`-RandomSuffixLength` (Alias: `-Rsl`) appends random characters for scenarios that need a globally-unique name:
+
+```powershell
+Get-CafResourceName Microsoft.Storage/storageAccounts -Suffix contoso,prod -Rsl 6
 ```
 ```text
 contosostabcdef
 ```
 
-Pass `-RandomSuffixSeed` when you need the random suffix to be reproducible - e.g. so repeated deployments of the same resource land on the same name:
+Pass `-RandomSuffixSeed` (Alias: `-Rss`) when you need the random suffix to be reproducible - e.g. so repeated deployments of the same resource land on the same name:
 
 ```powershell
-Get-CafResourceName Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
+Get-CafResourceName Microsoft.Storage/storageAccounts -Suffix contoso,prod -Rsl 6 -Rss 456
+```
+```text
+stcontosoprod8ws5dc
 ```
 
 `-Count` generates several sequential instance numbers in one call, starting from `-InstanceNumber` if specified, otherwise `1`:
 
 ```powershell
-Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
+Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod -Count 3
 ```
 ```text
-contoso-prod-vm-001
-contoso-prod-vm-002
-contoso-prod-vm-003
+vm-contoso-prod-001
+vm-contoso-prod-002
+vm-contoso-prod-003
 ```
 
 The [naming components guide](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming#choose-naming-components) also calls out workload/application, environment and region as useful naming components - CAF deliberately leaves their order up to you, so just include workload/environment in `-Prefix`/`-Suffix` in whichever order your organization has standardized on, e.g. `-Prefix workload1, prod`.
@@ -104,15 +154,6 @@ Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -Reg
 ```
 ```text
 contoso-prod-vm-eus
-```
-
-Some ARM resource types cover more than one kind of resource with different abbreviations (for example `Microsoft.Web/sites` is used by both a "Web app" and a "Function app"). When that happens, `Get-CafResourceName` tells you which `-Resource` values to choose between:
-
-```powershell
-Get-CafResourceName Microsoft.Web/sites -Resource 'Function app' -Prefix contoso
-```
-```text
-contoso-func
 ```
 
 If you already know the CAF abbreviation, `-Alias` (aliased `-Slug`) is a shorter alternative to `-ResourceType`:
