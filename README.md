@@ -54,7 +54,7 @@ This will be randomly generated each time the cmdlet is called. If you want the 
 `Get-CafResourceName` builds a name from an optional prefix, the CAF-recommended abbreviation for an Azure resource type, and an optional suffix - checking the result against that resource type's length limit and allowed characters along the way. It's a thin wrapper around `New-CafResourceName` that returns just the name as a string; use `New-CafResourceName` directly if you want the `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object instead (see the batch-generation example below).
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Suffix 01
+Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -Suffix 01
 ```
 ```text
 contoso-prod-vm-01
@@ -63,7 +63,7 @@ contoso-prod-vm-01
 `-InstanceNumber` is zero-padded to 3 digits by default:
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
+Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
 ```
 ```text
 contoso-prod-vm-001
@@ -72,7 +72,7 @@ contoso-prod-vm-001
 `-RandomSuffixLength` appends random characters for scenarios that need a globally-unique name:
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
+Get-CafResourceName Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
 ```
 ```text
 contosostabcdef
@@ -81,13 +81,13 @@ contosostabcdef
 Pass `-RandomSuffixSeed` when you need the random suffix to be reproducible - e.g. so repeated deployments of the same resource land on the same name:
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
+Get-CafResourceName Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
 ```
 
 `-Count` generates several sequential instance numbers in one call, starting from `-InstanceNumber` if specified, otherwise `1`:
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
+Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
 ```
 ```text
 contoso-prod-vm-001
@@ -100,7 +100,7 @@ The [naming components guide](https://learn.microsoft.com/en-us/azure/cloud-adop
 `-Region` resolves an Azure region to its abbreviation the same way `-ResourceType` resolves to its slug (e.g. `eastus` -> `eus`), and inserts it after any `-Suffix`, so `-Suffix` always comes right after the resource type's slug (aside from an instance number, which stays last):
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
+Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
 ```
 ```text
 contoso-prod-vm-eus
@@ -109,7 +109,7 @@ contoso-prod-vm-eus
 Some ARM resource types cover more than one kind of resource with different abbreviations (for example `Microsoft.Web/sites` is used by both a "Web app" and a "Function app"). When that happens, `Get-CafResourceName` tells you which `-Resource` values to choose between:
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Web/sites -Resource 'Function app' -Prefix contoso
+Get-CafResourceName Microsoft.Web/sites -Resource 'Function app' -Prefix contoso
 ```
 ```text
 contoso-func
@@ -148,7 +148,7 @@ Import-Csv ./resources.csv | New-CafResourceName | Export-Csv ./generated-names.
 Add `-Verbose` to see the length-budget reasoning behind a result (reserved segments, trimming decisions):
 
 ```powershell
-Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -Verbose
+Get-CafResourceName Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -Verbose
 ```
 ```text
 VERBOSE: Resolved to Microsoft.Storage/storageAccounts [Storage account] (slug 'st', max length 24, ...).
@@ -165,7 +165,7 @@ If your organization always uses the same prefix, region, separator, instance-nu
 ```powershell
 New-CafNamingConvention -Path ./contoso-prod.json -Prefix contoso, prod -Region eastus -Separator '-' -InstanceNumberPadding 2
 
-Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -ConventionPath ./contoso-prod.json -InstanceNumber 1
+Get-CafResourceName Microsoft.Compute/virtualMachines -ConventionPath ./contoso-prod.json -InstanceNumber 1
 ```
 ```text
 contoso-prod-vm-eus-01
@@ -178,7 +178,7 @@ Anything you also specify explicitly (including via the pipeline) still takes pr
 `Test-CafResourceName` checks an existing name against the same rules `Get-CafResourceName` enforces - minimum/maximum length, required casing, whether a dash is allowed, and the overall set of valid characters - returning an object showing which rules pass or fail, or just an overall `$true`/`$false` with `-Quiet`:
 
 ```powershell
-Test-CafResourceName -Name 'contoso-prod-vm-001' -ResourceType Microsoft.Compute/virtualMachines
+Test-CafResourceName -Name 'contoso-prod-vm-001' Microsoft.Compute/virtualMachines
 ```
 ```text
 Name            : contoso-prod-vm-001
@@ -195,7 +195,7 @@ ValidCharacters : True
 `-Quiet` returns just the boolean - here `$false` because storage account names must be lowercase:
 
 ```powershell
-Test-CafResourceName -Name 'CONTOSO' -ResourceType Microsoft.Storage/storageAccounts -Quiet
+Test-CafResourceName -Name 'CONTOSO' Microsoft.Storage/storageAccounts -Quiet
 ```
 ```text
 False
@@ -204,7 +204,7 @@ False
 `IsValid` is the authoritative result; the other fields are a diagnostic breakdown that can't always add up to it perfectly for every resource type (see the cmdlet's help for why) - treat `IsValid` as the source of truth if the two ever disagree. When invalid, `Reason` explains why in plain English:
 
 ```powershell
-(Test-CafResourceName -Name 'CONTOSO' -ResourceType Microsoft.Storage/storageAccounts).Reason
+(Test-CafResourceName -Name 'CONTOSO' Microsoft.Storage/storageAccounts).Reason
 ```
 ```text
 Name must be all lowercase for this resource type.
