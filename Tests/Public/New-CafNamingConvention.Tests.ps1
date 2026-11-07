@@ -30,6 +30,14 @@ Describe 'New-CafNamingConvention' {
             Should -Be 'contoso-vm-idq1'
     }
 
+    It 'Accepts -RandomSuffixLength via its -Rsl alias' {
+        $Path = Join-Path $TestDrive 'rsl-alias.json'
+        New-CafNamingConvention -Path $Path -Prefix 'contoso' -Rsl 4
+
+        $Convention = Get-Content -Path $Path -Raw | ConvertFrom-Json
+        $Convention.RandomSuffixLength | Should -Be 4
+    }
+
     It 'Refuses to overwrite an existing file without -Force' {
         $Path = Join-Path $TestDrive 'existing.json'
         New-CafNamingConvention -Path $Path -Prefix 'contoso'

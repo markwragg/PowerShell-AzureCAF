@@ -260,6 +260,17 @@ Describe 'New-CafResourceName' {
             (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -RandomSuffixSeed 42).Name |
                 Should -Be 'contoso-vm'
         }
+
+        It 'Accepts -RandomSuffixLength via its -Rsl alias' {
+            (New-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -Rsl 6).Name |
+                Should -Match '^contosost[a-z0-9]{6}$'
+        }
+
+        It 'Accepts -RandomSuffixSeed via its -Rss alias' {
+            $First = New-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -Rss 42
+            $Second = New-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 42
+            $First.Name | Should -Be $Second.Name
+        }
     }
 
     Context 'Resource type resolution' {

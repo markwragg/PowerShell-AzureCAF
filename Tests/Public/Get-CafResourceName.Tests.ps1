@@ -63,5 +63,10 @@ Describe 'Get-CafResourceName' {
             { Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Region 'doesnotexist' -ErrorAction Stop } |
                 Should -Throw
         }
+
+        It 'Accepts -RandomSuffixLength/-RandomSuffixSeed via their -Rsl/-Rss aliases' {
+            Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -Rsl 8 -Rss 42 |
+                Should -Be (New-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 42).Name
+        }
     }
 }

@@ -361,11 +361,13 @@ The characters are reserved
 out of the resource type's maximum length before the rest of the name is trimmed, so the random
 suffix is never cut short.
 Falls back to -ConventionPath's value if not specified.
+Also
+accepts -Rsl as an alias.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: Rsl
 
 Required: False
 Position: Named
@@ -381,11 +383,12 @@ the same name idempotently, e.g.
 across repeated deployments.
 Ignored unless -RandomSuffixLength
 is specified.
+Also accepts -Rss as an alias.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: Rss
 
 Required: False
 Position: Named

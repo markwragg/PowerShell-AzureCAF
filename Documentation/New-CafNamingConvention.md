@@ -149,11 +149,12 @@ Accept wildcard characters: False
 The default -RandomSuffixLength.
 Omit to leave this to Get-CafResourceName's own default (0, i.e.
 no random suffix unless a call asks for one explicitly).
+Also accepts -Rsl as an alias.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: Rsl
 
 Required: False
 Position: Named

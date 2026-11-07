@@ -81,12 +81,13 @@ function New-CafResourceName {
         lowercase, even for a resource type that otherwise allows uppercase - the suffix exists for
         uniqueness, not communication, and doesn't need the extra entropy. The characters are reserved
         out of the resource type's maximum length before the rest of the name is trimmed, so the random
-        suffix is never cut short. Falls back to -ConventionPath's value if not specified.
+        suffix is never cut short. Falls back to -ConventionPath's value if not specified. Also
+        accepts -Rsl as an alias.
     .PARAMETER RandomSuffixSeed
         Seeds the random number generator used by -RandomSuffixLength, so the same seed (with the same
         other parameters) always produces the same random characters - useful if you need to generate
         the same name idempotently, e.g. across repeated deployments. Ignored unless -RandomSuffixLength
-        is specified.
+        is specified. Also accepts -Rss as an alias.
     .PARAMETER ConventionPath
         Path to a JSON file of organizational naming-convention defaults for -Prefix, -Suffix, -Region,
         -Separator, -InstanceNumberPadding and -RandomSuffixLength, created with
@@ -219,11 +220,13 @@ function New-CafResourceName {
         $Count = 1,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Rsl')]
         [ValidateRange(0, 24)]
         [int]
         $RandomSuffixLength = 0,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Rss')]
         [int]
         $RandomSuffixSeed,
 
