@@ -308,11 +308,13 @@ resources (e.g.
 examples).
 Zero-padded to -InstanceNumberPadding digits and reserved out of the resource type's
 maximum length before the rest of the name is trimmed, so it's never cut short.
+Also accepts
+-In as an alias.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: In
 
 Required: False
 Position: Named
@@ -329,11 +331,13 @@ A number that's already at least this many digits long is left as-is.
 Ignored unless
 -InstanceNumber is specified.
 Falls back to -ConventionPath's value if not specified.
+Also
+accepts -Inp as an alias.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: Inp
 
 Required: False
 Position: Named

@@ -68,5 +68,10 @@ Describe 'Get-CafResourceName' {
             Get-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -Rsl 8 -Rss 42 |
                 Should -Be (New-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 42).Name
         }
+
+        It 'Accepts -InstanceNumber/-InstanceNumberPadding via their -In/-Inp aliases' {
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -In 1 -Inp 2 |
+                Should -Be (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -InstanceNumber 1 -InstanceNumberPadding 2).Name
+        }
     }
 }

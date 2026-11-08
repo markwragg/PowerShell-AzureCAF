@@ -38,6 +38,14 @@ Describe 'New-CafNamingConvention' {
         $Convention.RandomSuffixLength | Should -Be 4
     }
 
+    It 'Accepts -InstanceNumberPadding via its -Inp alias' {
+        $Path = Join-Path $TestDrive 'inp-alias.json'
+        New-CafNamingConvention -Path $Path -Prefix 'contoso' -Inp 2
+
+        $Convention = Get-Content -Path $Path -Raw | ConvertFrom-Json
+        $Convention.InstanceNumberPadding | Should -Be 2
+    }
+
     It 'Refuses to overwrite an existing file without -Force' {
         $Path = Join-Path $TestDrive 'existing.json'
         New-CafNamingConvention -Path $Path -Prefix 'contoso'

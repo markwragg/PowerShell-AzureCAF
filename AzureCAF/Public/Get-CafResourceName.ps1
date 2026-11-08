@@ -58,11 +58,13 @@ function Get-CafResourceName {
         An instance number to append to the resource name, for differentiating otherwise-identical
         resources (e.g. 'vm-sql-test-001', 'vm-sql-test-002' in the Cloud Adoption Framework's own naming
         examples). Zero-padded to -InstanceNumberPadding digits and reserved out of the resource type's
-        maximum length before the rest of the name is trimmed, so it's never cut short.
+        maximum length before the rest of the name is trimmed, so it's never cut short. Also accepts
+        -In as an alias.
     .PARAMETER InstanceNumberPadding
         The minimum number of digits to zero-pad -InstanceNumber to, e.g. the default of 3 formats '1'
         as '001'. A number that's already at least this many digits long is left as-is. Ignored unless
-        -InstanceNumber is specified. Falls back to -ConventionPath's value if not specified.
+        -InstanceNumber is specified. Falls back to -ConventionPath's value if not specified. Also
+        accepts -Inp as an alias.
     .PARAMETER Count
         Generates this many names in one call, with sequential instance numbers, instead of just one.
         Starts from -InstanceNumber if specified (e.g. -InstanceNumber 5 -Count 3 produces 005, 006, 007),
@@ -194,11 +196,13 @@ function Get-CafResourceName {
         $Separator = '-',
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('In')]
         [ValidateRange(0, [int]::MaxValue)]
         [int]
         $InstanceNumber,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Inp')]
         [ValidateRange(1, 10)]
         [int]
         $InstanceNumberPadding = 3,

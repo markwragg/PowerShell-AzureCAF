@@ -132,11 +132,12 @@ Accept wildcard characters: False
 ### -InstanceNumberPadding
 The default -InstanceNumberPadding.
 Omit to leave this to Get-CafResourceName's own default (3).
+Also accepts -Inp as an alias.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: Inp
 
 Required: False
 Position: Named

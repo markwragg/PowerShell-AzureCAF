@@ -14,7 +14,9 @@ A PowerShell module for generating valid and consistent Azure Resource names per
 
 Use this module as part of PowerShell deployment scripts to generate suitable names for resources, or as part of pre-planning work to prepare resource names in advance, ensuring that each resource name is valid for the type of resource being deployed (giving consideration to valid characters, casing and length).
 
-See the [Examples](/Examples/) folder for sample usage scripts.
+You could use this module as part of PowerShell scripts that create Azure resources, or as part of a pipeline to generate names as input for Infrastructure as Code (IaC) variables/templates.
+
+See the [Examples](/Examples/) folder for some sample usage scripts.
 
 ## Installation
 
@@ -82,19 +84,19 @@ Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod
 vm-contoso-prod
 ```
 
-Use `-InstanceNumber` to append a number to the end of the resource name (zero-padded to 3 digits by default):
+Use `-InstanceNumber` (Alias: `-In`) to append a number to the end of the resource name (zero-padded to 3 digits by default):
 
 ```powershell
-Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod -InstanceNumber 1
+Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod -In 1
 ```
 ```text
 vm-contoso-prod-001
 ```
 
-Use `-InstanceNumberPadding` to specify a different number of leading zeros:
+Use `-InstanceNumberPadding` (Alias: `-Inp`) to specify a different number of leading zeros:
 
 ```powershell
-Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod -InstanceNumber 1 -InstanceNumberPadding 2
+Get-CafResourceName Microsoft.Compute/virtualMachines -Suffix contoso,prod -In 1 -Inp 2
 ```
 ```text
 vm-contoso-prod-01
@@ -145,12 +147,12 @@ vm-contoso-prod-002
 vm-contoso-prod-003
 ```
 
-The [naming components guide](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming#choose-naming-components) also calls out workload/application, environment and region as useful naming components - CAF deliberately leaves their order up to you, so just include workload/environment in `-Prefix`/`-Suffix` in whichever order your organization has standardized on, e.g. `-Prefix workload1, prod`.
+The [naming components guide](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming#choose-naming-components) also calls out workload/application, environment and region as useful naming components - CAF deliberately leaves their order up to you, so just include workload/environment in `-Prefix`/`-Suffix` in whichever order your organization has standardized on, e.g. `-Prefix workload1,prod`.
 
 `-Region` resolves an Azure region to its abbreviation the same way `-ResourceType` resolves to its slug (e.g. `eastus` -> `eus`), and inserts it after any `-Suffix`, so `-Suffix` always comes right after the resource type's slug (aside from an instance number, which stays last):
 
 ```powershell
-Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
+Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix contoso,prod -Region eastus
 ```
 ```text
 contoso-prod-vm-eus
@@ -189,14 +191,17 @@ Import-Csv ./resources.csv | New-CafResourceName | Export-Csv ./generated-names.
 Add `-Verbose` to see the length-budget reasoning behind a result (reserved segments, trimming decisions):
 
 ```powershell
-Get-CafResourceName Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -Verbose
+Get-CafResourceName -Alias st -Prefix contoso -Rsl 6 -Verbose
 ```
 ```text
-VERBOSE: Resolved to Microsoft.Storage/storageAccounts [Storage account] (slug 'st', max length 24, ...).
-VERBOSE: Reserving 6 character(s) for the random suffix; 18 of 24 remain for the prefix/slug/suffix.
+VERBOSE: Resolved to Microsoft.Storage/storageAccounts [Storage account] (slug 'st', max length 24, dashes False, lowercase True).
+VERBOSE: Reserving 6 character(s) for the random suffix; 18 of 24 remain for the prefix/slug/region/suffix.
 VERBOSE: Joined 'contoso', 'st' with separator '' -> 'contosost' (9 characters).
-VERBOSE: Appended random suffix 'xxxxxx' -> 'contosostxxxxxx'.
-VERBOSE: Final result: 'contosostxxxxxx'.
+VERBOSE: Appended random suffix 'ujiqhs' -> 'contosostujiqhs'.
+VERBOSE: Final result: 'contosostujiqhs'.
+```
+```text
+contosostujiqhs
 ```
 
 ### Reusable naming conventions

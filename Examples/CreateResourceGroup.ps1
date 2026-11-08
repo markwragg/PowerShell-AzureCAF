@@ -3,23 +3,30 @@
     This script demonstrates how to use the AzureCAF module to create a resource group, suffixed
     with the specified organisation, environment and region short code.
 #>
+[CmdletBinding(supportsShouldProcess)]
 param(
     # Organisation name
-    [string]$organisation = 'contoso',
+    [Parameter(Mandatory = $true)]
+    [string]$organisation,
 
     # Environment name (e.g., dev, test, prod)
-    [string]$environment = 'dev',
+    [Parameter(Mandatory = $true)]
+    [string]$environment,
 
     # Azure region (e.g., eastus, westus)
-    [string]$region = 'eastus'
+    [Parameter(Mandatory = $true)]
+    [string]$region
 )
 
 Import-Module AzureCAF
 
 # Generate Resource Group name
-$rgName = Get-CafResourceName -ResourceType 'Microsoft.Resources/resourceGroups' -Suffix $organisation,$environment -Region $region
+$rgName = Get-CafResourceName -Alias rg -Suffix $organisation,$environment -Region $region
 
-$rgName
-# rg-contoso-dev-eus
+# Output the generated names for verification
+"rgName: $rgName"
 
-New-AzResourceGroup -Name $rgName -Location $region
+# Create the resource
+if ($PSCmdlet.ShouldProcess("Resource Group: $rgName")) {
+    New-AzResourceGroup -Name $rgName -Location $region
+}

@@ -1,5 +1,9 @@
 # Change Log
 
+## !Deploy
+
+* `New-CafResourceName`/`Get-CafResourceName`'s `-InstanceNumber`/`-InstanceNumberPadding` parameters (and `New-CafNamingConvention`'s `-InstanceNumberPadding`) now also accept `-In`/`-Inp` as shorter aliases.
+
 ## [0.7.6] - 2026-11-07
 
 * `New-CafResourceName`/`Get-CafResourceName`'s `-RandomSuffixLength`/`-RandomSuffixSeed` parameters (and `New-CafNamingConvention`'s `-RandomSuffixLength`) now also accept `-Rsl`/`-Rss` as shorter aliases.

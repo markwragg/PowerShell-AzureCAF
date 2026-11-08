@@ -271,6 +271,16 @@ Describe 'New-CafResourceName' {
             $Second = New-CafResourceName -ResourceType 'Microsoft.Storage/storageAccounts' -Prefix 'contoso' -RandomSuffixLength 8 -RandomSuffixSeed 42
             $First.Name | Should -Be $Second.Name
         }
+
+        It 'Accepts -InstanceNumber via its -In alias' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -In 1).Name |
+                Should -Be 'contoso-vm-001'
+        }
+
+        It 'Accepts -InstanceNumberPadding via its -Inp alias' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -InstanceNumber 1 -Inp 2).Name |
+                Should -Be 'contoso-vm-01'
+        }
     }
 
     Context 'Resource type resolution' {
