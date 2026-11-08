@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy
+## [0.7.7] - 2026-11-08
 
 * `New-CafResourceName`/`Get-CafResourceName`'s `-InstanceNumber`/`-InstanceNumberPadding` parameters (and `New-CafNamingConvention`'s `-InstanceNumberPadding`) now also accept `-In`/`-Inp` as shorter aliases.
 
