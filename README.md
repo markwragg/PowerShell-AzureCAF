@@ -137,10 +137,9 @@ When using `-ResourceType` a small number of resources use the same base identif
 ```powershell
 Get-CafResourceName Microsoft.Web/sites -Suffix contoso,prod
 ```
-```ansi
-[31mWrite-Error: 'Microsoft.Web/sites' matches more than one resource type. Narrow it down with -Resource:
-'Microsoft.Web/sites [Function app]','Microsoft.Web/sites [Web app]'.[0m
-```
+> [!CAUTION]
+> Write-Error: 'Microsoft.Web/sites' matches more than one resource type. Narrow it down with -Resource:
+> 'Microsoft.Web/sites [Function app]','Microsoft.Web/sites [Web app]'.
 ```powershell
 Get-CafResourceName Microsoft.Web/sites -Resource 'Web app' -Suffix contoso,prod
 ```
@@ -227,13 +226,12 @@ Add `-Verbose` to see the length-budget reasoning behind a result (reserved segm
 ```powershell
 Get-CafResourceName -Alias st -Prefix contoso -Rsl 6 -Verbose
 ```
-```ansi
-[34mVERBOSE: Resolved to Microsoft.Storage/storageAccounts [Storage account] (slug 'st', max length 24, dashes False, lowercase True).
-VERBOSE: Reserving 6 character(s) for the random suffix; 18 of 24 remain for the prefix/slug/region/suffix.
-VERBOSE: Joined 'contoso', 'st' with separator '' -> 'contosost' (9 characters).
-VERBOSE: Appended random suffix 'ujiqhs' -> 'contosostujiqhs'.
-VERBOSE: Final result: 'contosostujiqhs'.[0m
-```
+> [!NOTE]
+> VERBOSE: Resolved to Microsoft.Storage/storageAccounts [Storage account] (slug 'st', max length 24, dashes False, lowercase True).
+> VERBOSE: Reserving 6 character(s) for the random suffix; 18 of 24 remain for the prefix/slug/region/suffix.
+> VERBOSE: Joined 'contoso', 'st' with separator '' -> 'contosost' (9 characters).
+> VERBOSE: Appended random suffix 'ujiqhs' -> 'contosostujiqhs'.
+> VERBOSE: Final result: 'contosostujiqhs'.
 ```text
 contosostujiqhs
 ```
