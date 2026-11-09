@@ -140,6 +140,7 @@ Get-CafResourceName Microsoft.Web/sites -Suffix contoso,prod
 > [!CAUTION]
 > Write-Error: 'Microsoft.Web/sites' matches more than one resource type. Narrow it down with -Resource:
 > 'Microsoft.Web/sites [Function app]','Microsoft.Web/sites [Web app]'.
+
 ```powershell
 Get-CafResourceName Microsoft.Web/sites -Resource 'Web app' -Suffix contoso,prod
 ```
@@ -232,6 +233,7 @@ Get-CafResourceName -Alias st -Prefix contoso -Rsl 6 -Verbose
 > VERBOSE: Joined 'contoso', 'st' with separator '' -> 'contosost' (9 characters).
 > VERBOSE: Appended random suffix 'ujiqhs' -> 'contosostujiqhs'.
 > VERBOSE: Final result: 'contosostujiqhs'.
+
 ```text
 contosostujiqhs
 ```
