@@ -32,7 +32,7 @@ Install-PSResource AzureCAF
 
 ## Cmdlets
 
-|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cmdlet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| Synopsis |
+| Cmdlet | Synopsis |
 | --- | --- |
 | `Export-CafResourceType` | Exports the Cloud Adoption Framework naming rules for one or more resource types to a CSV or Markdown file. |
 | `Get-CafRegion` | Looks up the abbreviation for one or more Azure regions. |
