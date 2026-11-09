@@ -111,6 +111,20 @@ Describe 'Test-CafResourceName' {
             $Result.ValidCharacters | Should -BeFalse
             $Result.IsValid | Should -BeTrue
         }
+
+        It 'Falls back to the generic pattern Reason for a positional rule none of the per-rule checks cover' {
+            # 'Microsoft.Network/frontDoors' (classic) requires the name to start and end with an
+            # alphanumeric character, but its InvalidCharsRegex allows a dash anywhere - so a
+            # leading dash passes every per-rule check yet still fails the overall pattern.
+            $Result = Test-CafResourceName -Name '-contoso' -Alias 'afd' -Resource 'classic'
+            $Result.IsValid | Should -BeFalse
+            $Result.MinLength | Should -BeTrue
+            $Result.MaxLength | Should -BeTrue
+            $Result.Casing | Should -BeTrue
+            $Result.Dashes | Should -BeTrue
+            $Result.ValidCharacters | Should -BeTrue
+            $Result.Reason | Should -Match 'does not match the required pattern'
+        }
     }
 
     Context '-Quiet' {

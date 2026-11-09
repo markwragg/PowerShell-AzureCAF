@@ -22,6 +22,20 @@ Describe 'New-CafNamingConvention' {
         $Convention.PSObject.Properties.Name | Should -Not -Contain 'RandomSuffixLength'
     }
 
+    It 'Writes -Suffix when specified' {
+        $Path = Join-Path $TestDrive 'suffix.json'
+        New-CafNamingConvention -Path $Path -Suffix '01', 'b'
+
+        (Get-Content -Path $Path -Raw | ConvertFrom-Json).Suffix | Should -Be @('01', 'b')
+    }
+
+    It 'Writes -Separator when specified' {
+        $Path = Join-Path $TestDrive 'separator.json'
+        New-CafNamingConvention -Path $Path -Separator '_'
+
+        (Get-Content -Path $Path -Raw | ConvertFrom-Json).Separator | Should -Be '_'
+    }
+
     It 'Produces a file Get-CafResourceName -ConventionPath can consume' {
         $Path = Join-Path $TestDrive 'roundtrip.json'
         New-CafNamingConvention -Path $Path -Prefix 'contoso' -RandomSuffixLength 4

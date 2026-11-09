@@ -254,20 +254,6 @@ function New-CafResourceName {
             }
         }
 
-        function Get-TrimString {
-            param (
-                [string]$InputObject,
-                [int]$MaxLength
-            )
-
-            if ($InputObject.Length -gt $MaxLength) {
-                $InputObject.Substring(0, $MaxLength)
-            }
-            else {
-                $InputObject
-            }
-        }
-
         $Convention = $null
         if ($ConventionPath) {
             if (-not (Test-Path -Path $ConventionPath -PathType Leaf)) {
@@ -390,7 +376,7 @@ function New-CafResourceName {
 
         if ($resourceName.Length -gt $mainBudget) {
             $beforeTrimLength = $resourceName.Length
-            $resourceName = Get-TrimString -InputObject $resourceName -MaxLength $mainBudget
+            $resourceName = $resourceName.Substring(0, $mainBudget)
             $reservedNote = if ($reservedDescriptions.Count -gt 0) { " (after reserving space for $($reservedDescriptions -join ' and '))" } else { '' }
             Write-Warning "Resource name has been trimmed to $mainBudget characters due to the $($definition.MaxLength) character max length restriction$reservedNote."
             Write-Verbose "Trimmed from $beforeTrimLength to $mainBudget characters -> '$resourceName'."

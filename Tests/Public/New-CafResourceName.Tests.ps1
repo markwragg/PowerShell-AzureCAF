@@ -30,6 +30,11 @@ Describe 'New-CafResourceName' {
             (Get-CafResourceType -Slug 'kv' | New-CafResourceName -Prefix 'contoso').Name |
                 Should -Be 'contoso-kv'
         }
+
+        It 'Uses an explicit -Separator instead of the default' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Suffix '01' -Separator '_').Name |
+                Should -Be 'contoso_vm_01'
+        }
     }
 
     Context 'Result object shape' {
@@ -96,6 +101,12 @@ Describe 'New-CafResourceName' {
 
         It 'Errors rather than silently dropping an unrecognized region' {
             { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'doesnotexist' -ErrorAction Stop } |
+                Should -Throw
+        }
+
+        It 'Errors when -Region matches more than one region as a substring' {
+            # 'us' is a substring of many ARM region names (eastus, westus, usgovarizona, etc).
+            { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'us' -ErrorAction Stop } |
                 Should -Throw
         }
     }
@@ -451,6 +462,24 @@ Describe 'New-CafResourceName' {
             Set-Content -Path $BadPath -Value 'not json'
             { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath $BadPath -ErrorAction Stop } |
                 Should -Throw
+        }
+
+        It 'Errors when the convention file has an out-of-range InstanceNumberPadding' {
+            # New-CafNamingConvention's own -InstanceNumberPadding is range-validated, but a hand-edited
+            # (or older/foreign) convention file isn't, so New-CafResourceName must catch it too.
+            $BadPaddingPath = Join-Path $TestDrive 'bad-padding-convention.json'
+            @{ InstanceNumberPadding = 11 } | ConvertTo-Json | Set-Content -Path $BadPaddingPath
+
+            { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -ConventionPath $BadPaddingPath -ErrorAction Stop } |
+                Should -Throw 'InstanceNumberPadding from the naming convention must be between 1 and 10, but was 11.'
+        }
+
+        It 'Errors when the convention file has an out-of-range RandomSuffixLength' {
+            $BadRslPath = Join-Path $TestDrive 'bad-rsl-convention.json'
+            @{ RandomSuffixLength = 25 } | ConvertTo-Json | Set-Content -Path $BadRslPath
+
+            { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -ConventionPath $BadRslPath -ErrorAction Stop } |
+                Should -Throw 'RandomSuffixLength from the naming convention must be between 0 and 24, but was 25.'
         }
     }
 
