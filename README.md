@@ -34,13 +34,13 @@ Install-PSResource AzureCAF
 
 | Cmdlet | Synopsis |
 | --- | --- |
-| `Export-CafResourceType` | Exports the Cloud Adoption Framework naming rules for one or more resource types to a CSV or Markdown file. |
-| `Get-CafRegion` | Looks up the abbreviation for one or more Azure regions. |
 | `Get-CafResourceName` | Generates an Azure resource name that follows the Cloud Adoption Framework naming convention, returning just the name as a string. |
-| `Get-CafResourceType` | Looks up the Cloud Adoption Framework naming rules for one or more Azure resource types. |
-| `New-CafNamingConvention` | Saves a reusable set of Get-CafResourceName defaults (prefix, suffix, region, separator, etc.) to a JSON file, so your organization's naming convention doesn't need to be retyped on every call. |
 | `New-CafResourceName` | Generates an Azure resource name that follows the Cloud Adoption Framework naming convention, returning the full result as an object. |
 | `Test-CafResourceName` | Tests whether a name complies with the Cloud Adoption Framework naming rules for an Azure resource type. |
+| `Get-CafResourceType` | Looks up the Cloud Adoption Framework naming rules for one or more Azure resource types. |
+| `Get-CafRegion` | Looks up the abbreviation for one or more Azure regions. |
+| `New-CafNamingConvention` | Saves a reusable set of Get-CafResourceName defaults (prefix, suffix, region, separator, etc.) to a JSON file, so your organization's naming convention doesn't need to be retyped on every call. |
+| `Export-CafResourceType` | Exports the Cloud Adoption Framework naming rules for one or more resource types to a CSV or Markdown file. |
 
 ## Usage
 
