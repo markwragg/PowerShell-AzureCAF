@@ -10,22 +10,28 @@ function Resolve-CafResourceDefinition {
         exactly one entry - callers should check for a $null/empty result and return without
         continuing.
 
-        -ResourceType takes priority as the primary identifier if given, then -Alias, with -Resource
-        narrowing *within* whichever of those matched (for the handful of types used by more than one
-        kind of resource). When neither -ResourceType nor -Alias is given, -Resource is used as the
-        primary identifier instead - every "Resource" friendly name in resourceDefinition.json happens
-        to be globally unique today, so this only fails if that ever stops being true upstream.
+        -ResourceType takes priority as the primary identifier if given, then -Alias, with -Resource and
+        (when -ResourceType is primary) -Alias both narrowing *within* whichever of those matched (for
+        the handful of types used by more than one kind of resource). When neither -ResourceType nor
+        -Alias is given, -Resource is used as the primary identifier instead - every "Resource" friendly
+        name in resourceDefinition.json happens to be globally unique today, so this only fails if that
+        ever stops being true upstream.
 
         Callers don't need to guard against more than one of -ResourceType/-Alias/-Resource being
         supplied - e.g. piping Get-CafResourceType's output through by property name binds ResourceType,
         Resource and (via its Slug alias) Alias all at once, since they're all present on that object
-        and all describe the same entry. Precedence just needs to be deterministic for that case, not
-        an error - it's not a conflict unless the caller explicitly typed contradictory values, which
-        isn't something this function can distinguish from the pipeline case anyway.
+        and all describe the same entry: narrowing by -Alias/-Resource after an already-unambiguous
+        -ResourceType match is a no-op in that case, since the pipelined values already agree with it.
+        Precedence just needs to be deterministic for that case, not an error - it's not a conflict
+        unless the caller explicitly typed contradictory values, in which case -Alias/-Resource narrowing
+        a -ResourceType match down to zero candidates reports that clearly rather than silently ignoring
+        it.
     .EXAMPLE
         Resolve-CafResourceDefinition -ResourceType 'Microsoft.Compute/virtualMachines'
     .EXAMPLE
         Resolve-CafResourceDefinition -Alias 'afd' -Resource 'classic'
+    .EXAMPLE
+        Resolve-CafResourceDefinition -ResourceType 'Microsoft.Web/sites' -Alias 'func'
     .EXAMPLE
         Resolve-CafResourceDefinition -Resource 'Key vault'
     #>
@@ -59,6 +65,17 @@ function Resolve-CafResourceDefinition {
     if ($candidates.Count -eq 0) {
         Write-Error "No resource type matches $identifier. Use Get-CafResourceType to search for a supported resource type."
         return
+    }
+
+    if ($Alias -and $ResourceType) {
+        $allCandidates = $candidates
+        $candidates = Select-CafMatch -InputObject $candidates -Property Slug -Value $Alias
+
+        if ($candidates.Count -eq 0) {
+            $options = ($allCandidates | ForEach-Object { "$($_.ResourceType) [$($_.Resource)]" }) -join "', '"
+            Write-Error "'$Alias' doesn't match any resource for $identifier. Available: '$options'."
+            return
+        }
     }
 
     if ($Resource -and -not $ResourceIsPrimary) {

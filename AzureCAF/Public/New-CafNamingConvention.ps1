@@ -1,35 +1,30 @@
 function New-CafNamingConvention {
     <#
     .SYNOPSIS
-        Saves a reusable set of Get-CafResourceName defaults (prefix, suffix, region, separator, etc.)
-        to a JSON file, so your organization's naming convention doesn't need to be retyped on every
-        call.
+        Saves a reusable set of Get-CafResourceName defaults to a JSON file, so your organization's
+        naming convention doesn't need to be retyped on every call.
     .DESCRIPTION
         Writes a small JSON file that Get-CafResourceName's -ConventionPath reads defaults from for
-        -Prefix, -Suffix, -Region, -Separator, -InstanceNumberPadding and -RandomSuffixLength. Anything
-        you pass explicitly to Get-CafResourceName still takes precedence over the file - this is just a
-        way to avoid repeating the same organization-standard values (company name, environment, region,
-        your preferred separator/padding) on every call.
+        -Prefix, -Suffix, -Region, -Separator, -Casing, -InstanceNumberPadding and -RandomSuffixLength.
+        Anything also passed explicitly to Get-CafResourceName still takes precedence over the file.
 
-        -RandomSuffixSeed deliberately isn't one of these defaults, even though Get-CafResourceName has
-        it - a convention file is meant to be the same shared values reused verbatim by everyone who
-        points -ConventionPath at it, but a seed baked in that way would make the "random" suffix
-        identical for every one of those calls, defeating the uniqueness -RandomSuffixLength exists for.
-        It only makes sense as a per-call value (e.g. for one idempotent redeploy), so it stays something
-        you pass to Get-CafResourceName directly.
+        -RandomSuffixSeed deliberately isn't included: a shared seed would make the "random" suffix
+        identical for everyone using the file, defeating the uniqueness -RandomSuffixLength exists for -
+        it only makes sense passed directly, per call.
     .PARAMETER Path
         Where to save the convention file, e.g. './contoso.json'.
     .PARAMETER Prefix
-        One or more strings to use as the default -Prefix, e.g. a company name or environment - see the
-        naming components guide this links to for what's commonly included.
+        One or more strings to use as the default -Prefix, e.g. a company name or environment.
     .PARAMETER Suffix
         One or more strings to use as the default -Suffix.
     .PARAMETER Region
         An Azure region (ARM name, display name or slug) to use as the default -Region - resolved and
-        stored as its ARM region name, the same way Get-CafResourceName resolves it, so an unrecognized
-        value is caught here rather than on every later call that uses the file.
+        stored as its ARM name, so an unrecognized value is caught here rather than on every later call.
     .PARAMETER Separator
         The default -Separator. Omit to leave this to Get-CafResourceName's own default ('-').
+    .PARAMETER Casing
+        The default -Casing ('None', 'Lower', 'Upper' or 'Title'). Omit to leave this to
+        Get-CafResourceName's own default ('None').
     .PARAMETER InstanceNumberPadding
         The default -InstanceNumberPadding. Omit to leave this to Get-CafResourceName's own default (3).
         Also accepts -Inp as an alias.
@@ -68,6 +63,10 @@ function New-CafNamingConvention {
         [string]
         $Separator,
 
+        [ValidateSet('None', 'Lower', 'Upper', 'Title')]
+        [string]
+        $Casing,
+
         [Alias('Inp')]
         [ValidateRange(1, 10)]
         [int]
@@ -103,11 +102,12 @@ function New-CafNamingConvention {
     }
 
     if ($PSBoundParameters.ContainsKey('Separator')) { $Convention.Separator = $Separator }
+    if ($PSBoundParameters.ContainsKey('Casing')) { $Convention.Casing = $Casing }
     if ($PSBoundParameters.ContainsKey('InstanceNumberPadding')) { $Convention.InstanceNumberPadding = $InstanceNumberPadding }
     if ($PSBoundParameters.ContainsKey('RandomSuffixLength')) { $Convention.RandomSuffixLength = $RandomSuffixLength }
 
     if ($Convention.Count -eq 0) {
-        Write-Error 'Specify at least one of -Prefix, -Suffix, -Region, -Separator, -InstanceNumberPadding or -RandomSuffixLength.'
+        Write-Error 'Specify at least one of -Prefix, -Suffix, -Region, -Separator, -Casing, -InstanceNumberPadding or -RandomSuffixLength.'
         return
     }
 

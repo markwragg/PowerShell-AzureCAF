@@ -68,6 +68,8 @@ Except for `{type}`, this module does not prescribe the use of any of the above 
 | `{region}` | `‑Region` | Appends the abbreviation for the specified region after `{suffix}` and before `{instance}`. If you want region to appear elsewhere in the order, add it to your `-Prefix` or `-Suffix` arrays instead. |
 | `{instance}` | `‑InstanceNumber` | Appends a number to the end of the resource name, padded with leading zeros as specified via `-InstanceNumberPadding`, which is set to 3 by default (so a single digit is padded by two zeros). |
 
+If you want the generated name in a particular case, `-Casing` re-cases every segment - `-Prefix`/`-Suffix`, `{type}`'s own slug and a resolved `{region}` abbreviation: `Lower`, `Upper` or `Title` (e.g. `-Prefix 'contoso'` with `-Casing Upper` becomes `'CONTOSO'`, and `{type}`'s `'vm'` slug becomes `'VM'` alongside it). A resource type that requires an all-lowercase name still overrides it regardless.
+
 If you want to append a random string of characters to the end of a resource name (useful where you need to ensure global uniqueness), you can use `-RandomSuffixLength` (Alias: `-Rsl`) to define how many characters to append.
 
 By default, this will be randomly generated each time the cmdlet is called. If you want the random string to be consistent (but still unique for each resource), provide a value to `-RandomSuffixSeed` (Alias: `-Rss`) and when generating a name for the same resource, the module will always generate the same random string (this is useful if you want a script to be idempotent, i.e: the same resources are created wit hthe same names every time).
@@ -212,6 +214,15 @@ contoso-prod-vm-eus
 
 > Use `Get-CafRegion` to list all available `Region`/`DisplayName`/`Slug` options, along with each region's paired region where available.
 
+Use `-Casing` to get the whole generated name in a consistent case, including the resource type's own slug:
+
+```powershell
+Get-CafResourceName Microsoft.Compute/virtualMachines -Prefix Contoso, PROD -Casing Upper
+```
+```text
+CONTOSO-PROD-VM
+```
+
 `Get-CafResourceName` accepts pipeline input by property name, so a list of resource specs - e.g. imported from a CSV, or any objects with ResourceType/Alias/Prefix/Suffix/etc. properties - can be batch-generated in one call:
 
 ```powershell
@@ -244,7 +255,7 @@ contosostujiqhs
 
 ### Reusable naming conventions
 
-If your organization always uses the same prefix, region, separator, instance-number padding or random-suffix length, save them once with `New-CafNamingConvention` instead of retyping them on every call:
+If your organization always uses the same prefix, region, separator, casing, instance-number padding or random-suffix length, save them once with `New-CafNamingConvention` instead of retyping them on every call:
 
 ```powershell
 New-CafNamingConvention -Path ./contoso-prod.json -Prefix contoso, prod -Region eastus -Separator '-' -InstanceNumberPadding 2

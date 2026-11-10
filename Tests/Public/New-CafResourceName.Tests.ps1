@@ -133,6 +133,59 @@ Describe 'New-CafResourceName' {
         }
     }
 
+    Context 'Casing parameter' {
+
+        It 'Leaves segments exactly as given when -Casing is not specified' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'Contoso', 'PROD').Name |
+                Should -Be 'Contoso-PROD-vm'
+        }
+
+        It 'Converts -Prefix/-Suffix segments, and the resource type''s slug, to upper case' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Suffix '01' -Casing Upper).Name |
+                Should -Be 'CONTOSO-VM-01'
+        }
+
+        It 'Converts -Prefix/-Suffix segments to lower case' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'CONTOSO' -Suffix 'B' -Casing Lower).Name |
+                Should -Be 'contoso-vm-b'
+        }
+
+        It 'Converts -Prefix/-Suffix segments, and the resource type''s slug, to title case' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso prod' -Casing Title).Name |
+                Should -Be 'Contoso Prod-Vm'
+        }
+
+        It 'Does not re-case an all-uppercase segment differently under Title casing (no acronym exception)' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'NYC' -Casing Title).Name |
+                Should -Be 'Nyc-Vm'
+        }
+
+        It 'Re-cases the resource type''s own slug, same as -Prefix/-Suffix' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Casing Upper).Name |
+                Should -Be 'CONTOSO-VM'
+        }
+
+        It 'Re-cases a resolved -Region abbreviation, same as -Prefix/-Suffix' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Region 'eastus' -Casing Upper).Name |
+                Should -Be 'CONTOSO-VM-EUS'
+        }
+
+        It 'Leaves the returned Slug property as the canonical abbreviation regardless of -Casing' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Casing Upper).Slug |
+                Should -Be 'vm'
+        }
+
+        It 'Is still overridden when the resource type requires an all-lowercase name' {
+            $Result = New-CafResourceName -ResourceType 'Microsoft.AnalysisServices/servers' -Prefix 'contoso' -Casing Upper -WarningAction SilentlyContinue
+            $Result.Name | Should -Be 'contosoas'
+        }
+
+        It 'Is still applied when -NoClean is specified' {
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -Casing Upper -NoClean).Name |
+                Should -Be 'CONTOSO-VM'
+        }
+    }
+
     Context 'Length trimming' {
 
         It 'Trims the name and warns when it exceeds the max length' {
@@ -312,6 +365,19 @@ Describe 'New-CafResourceName' {
         It 'Errors when -Resource does not match any candidate for the resource type' {
             { New-CafResourceName -ResourceType 'Microsoft.Web/sites' -Resource 'Does not exist' -ErrorAction Stop } | Should -Throw
         }
+
+        It 'Resolves an ambiguous resource type when -Alias is specified' {
+            (New-CafResourceName -ResourceType 'Microsoft.Web/sites' -Alias 'func' -Prefix 'contoso').Name |
+                Should -Be 'contoso-func'
+        }
+
+        It 'Errors when -Alias does not match any candidate for the resource type' {
+            { New-CafResourceName -ResourceType 'Microsoft.Web/sites' -Alias 'doesnotexist' -ErrorAction Stop } | Should -Throw
+        }
+
+        It 'Errors rather than silently ignoring an -Alias that conflicts with an already-unambiguous -ResourceType' {
+            { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Alias 'vmss' -ErrorAction Stop } | Should -Throw
+        }
     }
 
     Context 'Resolving by alias' {
@@ -480,6 +546,32 @@ Describe 'New-CafResourceName' {
 
             { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -ConventionPath $BadRslPath -ErrorAction Stop } |
                 Should -Throw 'RandomSuffixLength from the naming convention must be between 0 and 24, but was 25.'
+        }
+
+        It 'Falls back to -Casing from the convention file when not specified explicitly' {
+            $CasingPath = Join-Path $TestDrive 'casing-convention.json'
+            @{ Casing = 'Upper' } | ConvertTo-Json | Set-Content -Path $CasingPath
+
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -ConventionPath $CasingPath).Name |
+                Should -Be 'CONTOSO-VM'
+        }
+
+        It 'Lets an explicit -Casing override the convention file' {
+            $CasingPath = Join-Path $TestDrive 'casing-override-convention.json'
+            @{ Casing = 'Upper' } | ConvertTo-Json | Set-Content -Path $CasingPath
+
+            (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -ConventionPath $CasingPath -Casing Lower).Name |
+                Should -Be 'contoso-vm'
+        }
+
+        It 'Errors when the convention file has an invalid Casing value' {
+            # New-CafNamingConvention's own -Casing is ValidateSet-constrained, but a hand-edited (or
+            # older/foreign) convention file isn't, so New-CafResourceName must catch it too.
+            $BadCasingPath = Join-Path $TestDrive 'bad-casing-convention.json'
+            @{ Casing = 'Diagonal' } | ConvertTo-Json | Set-Content -Path $BadCasingPath
+
+            { New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -ConventionPath $BadCasingPath -ErrorAction Stop } |
+                Should -Throw "Casing from the naming convention must be one of 'None', 'Lower', 'Upper' or 'Title', but was 'Diagonal'."
         }
     }
 

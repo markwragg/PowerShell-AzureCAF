@@ -19,7 +19,15 @@ Describe 'New-CafNamingConvention' {
         $Convention.PSObject.Properties.Name | Should -Not -Contain 'Suffix'
         $Convention.PSObject.Properties.Name | Should -Not -Contain 'Region'
         $Convention.PSObject.Properties.Name | Should -Not -Contain 'Separator'
+        $Convention.PSObject.Properties.Name | Should -Not -Contain 'Casing'
         $Convention.PSObject.Properties.Name | Should -Not -Contain 'RandomSuffixLength'
+    }
+
+    It 'Writes -Casing when specified' {
+        $Path = Join-Path $TestDrive 'casing.json'
+        New-CafNamingConvention -Path $Path -Casing 'Upper'
+
+        (Get-Content -Path $Path -Raw | ConvertFrom-Json).Casing | Should -Be 'Upper'
     }
 
     It 'Writes -Suffix when specified' {
@@ -115,6 +123,17 @@ Describe 'New-CafNamingConvention' {
 
             Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath $Path |
                 Should -Be 'contoso-vm-eus'
+        }
+    }
+
+    Context 'Casing' {
+
+        It 'Flows through to Get-CafResourceName -ConventionPath' {
+            $Path = Join-Path $TestDrive 'casing-roundtrip.json'
+            New-CafNamingConvention -Path $Path -Prefix 'contoso' -Casing 'Upper'
+
+            Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -ConventionPath $Path |
+                Should -Be 'CONTOSO-VM'
         }
     }
 }
