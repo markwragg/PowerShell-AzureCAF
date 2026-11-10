@@ -8,30 +8,25 @@ returning the full result as an object.
 
 ```
 New-CafResourceName [[-ResourceType] <String>] [-Alias <String>] [-Resource <String>] [-Prefix <String[]>]
- [-Suffix <String[]>] [-Region <String>] [-Separator <String>] [-InstanceNumber <Int32>]
+ [-Suffix <String[]>] [-Region <String>] [-Separator <String>] [-Casing <String>] [-InstanceNumber <Int32>]
  [-InstanceNumberPadding <Int32>] [-Count <Int32>] [-RandomSuffixLength <Int32>] [-RandomSuffixSeed <Int32>]
  [-ConventionPath <String>] [-NoClean] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Builds a resource name from an optional prefix, the Cloud Adoption Framework recommended
-abbreviation for the given Azure resource type, and an optional suffix.
-The result is checked
-against the resource type's length limit and allowed characters, and is trimmed and/or converted
-to lowercase automatically if the resource type requires it.
+Builds a resource name from an optional prefix, the CAF-recommended abbreviation for the given
+Azure resource type, and an optional suffix - trimmed, cleaned and cased to fit that resource
+type's length limit, allowed characters and casing rules.
 
 Returns an object with Name, ResourceType, Resource, Slug, InstanceNumber and RandomSuffix
-properties - use Get-CafResourceName instead if you just want the name as a plain string.
-
-Accepts pipeline input by property name, so a list of resource specs (e.g.
-imported from a CSV
-or a PSD1 describing a whole deployment) can be piped straight through to generate every name
-for a project in one batch - see the pipeline example below.
-
-Use Get-CafResourceType to discover the ResourceType/Resource values this cmdlet accepts.
-Use
--Verbose to see the length-budget reasoning (reserved segments, trimming decisions) behind a
-given result.
+properties - use Get-CafResourceName instead for just the name as a plain string.
+Accepts
+pipeline input by property name, so a list of resource specs (e.g.
+from a CSV) can be batch-
+generated in one call - see the pipeline example below.
+Use Get-CafResourceType to discover the
+accepted ResourceType/Resource values, and -Verbose to see the length-budget reasoning behind a
+result.
 
 ## EXAMPLES
 
@@ -80,20 +75,30 @@ always comes right after the resource type's slug.
 
 ### EXAMPLE 6
 ```
+New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix Contoso, Prod -Casing Upper
+```
+
+Generates 'CONTOSO-PROD-VM' - -Casing re-cases every segment, including the resource type's
+own 'vm' slug, without needing to retype -Prefix/-Suffix in a particular case.
+The returned
+Slug property still reports the canonical 'vm', regardless of -Casing.
+
+### EXAMPLE 7
+```
 New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
 ```
 
 Generates 'contoso-prod-vm-001' - -InstanceNumber is zero-padded to 3 digits by default, matching
 the Cloud Adoption Framework's own example names such as 'vm-sql-test-001'.
 
-### EXAMPLE 7
+### EXAMPLE 8
 ```
 New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
 ```
 
 Generates 'contoso-prod-vm-001', 'contoso-prod-vm-002' and 'contoso-prod-vm-003' in one call.
 
-### EXAMPLE 8
+### EXAMPLE 9
 ```
 New-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
 ```
@@ -101,14 +106,14 @@ New-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix cont
 Generates a storage account name such as 'contosostabcdef', with 6 random characters appended to
 help ensure the globally-unique name doesn't collide with one that already exists.
 
-### EXAMPLE 9
+### EXAMPLE 10
 ```
 New-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
 ```
 
 Generates the same storage account name every time it's run, since the random suffix is seeded.
 
-### EXAMPLE 10
+### EXAMPLE 11
 ```
 New-CafResourceName -ResourceType Microsoft.Web/sites -Resource 'Function app' -Prefix contoso, prod
 ```
@@ -117,7 +122,15 @@ Generates a function app name.
 -Resource is required here because 'Microsoft.Web/sites' is also
 used for web apps, which use a different abbreviation.
 
-### EXAMPLE 11
+### EXAMPLE 12
+```
+New-CafResourceName -ResourceType Microsoft.Web/sites -Alias func -Prefix contoso, prod
+```
+
+Equivalent to the previous example - -Alias disambiguates 'Microsoft.Web/sites' just like
+-Resource does, if you already know the abbreviation rather than the friendly name.
+
+### EXAMPLE 13
 ```
 Get-CafResourceType -Slug kv | New-CafResourceName -Prefix contoso -RandomSuffixLength 4
 ```
@@ -125,7 +138,7 @@ Get-CafResourceType -Slug kv | New-CafResourceName -Prefix contoso -RandomSuffix
 Pipes the resource type definition for the 'kv' (Key Vault) abbreviation straight into
 New-CafResourceName.
 
-### EXAMPLE 12
+### EXAMPLE 14
 ```
 New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso -ConventionPath ./contoso.json
 ```
@@ -134,7 +147,7 @@ Uses -Prefix explicitly, but falls back to whatever -Suffix/-Region/-Separator/e
 are saved in
 contoso.json (see New-CafNamingConvention) for anything not specified here.
 
-### EXAMPLE 13
+### EXAMPLE 15
 ```
 Import-Csv ./resources.csv | New-CafResourceName | Export-Csv ./generated-names.csv
 ```
@@ -152,14 +165,9 @@ iteration) each one came from.
 The ARM resource type to generate a name for, e.g.
 'Microsoft.Compute/virtualMachines'.
 Matches
-as a substring by default, so 'virtualMachines' also works - as long as it narrows down to a
-single resource type, or you also specify -Resource.
-Tab completion lists the resource types
-known to the module.
-Normally used on its own (or -Alias, or -Resource, used instead); takes
-precedence if more than one happens to be specified, e.g.
-by piping in an object that has
-ResourceType, Alias and Resource properties all describing the same entry.
+as a substring; use -Resource to disambiguate if needed.
+Tab-completable, and takes precedence
+over -Alias/-Resource if more than one is specified.
 
 ```yaml
 Type: String
@@ -174,14 +182,11 @@ Accept wildcard characters: False
 ```
 
 ### -Alias
-The Cloud Adoption Framework abbreviation to generate a name for, e.g.
-'vmss', if you already
-know it, used as a short alias for the ARM resource type.
-Matches as a substring by default,
-same as -ResourceType, and also accepts -Slug as an alias (so piping Get-CafResourceType's output
-straight in binds to this by its Slug property).
-Normally used on its own, instead of
--ResourceType.
+The CAF abbreviation to generate a name for, e.g.
+'vmss' - a shorter alternative to
+-ResourceType (also accepts -Slug).
+Can also disambiguate an ambiguous -ResourceType, the same
+way -Resource does.
 
 ```yaml
 Type: String
@@ -196,15 +201,10 @@ Accept wildcard characters: False
 ```
 
 ### -Resource
-The friendly name of the resource to generate, e.g.
-'Key vault' - every such name in the
-module's data is unique, so on its own this works as a third alternative to -ResourceType/
--Alias (also matching as a substring, so 'vault' alone works too).
-It also doubles as a
-disambiguator when combined with -ResourceType/-Alias, for the handful of ARM types used by
-more than one kind of resource (for example 'Microsoft.Web/sites' covers both a "Web app" and a
-"Function app", with different recommended abbreviations) - required in that case, since
--ResourceType/-Alias alone would otherwise be ambiguous.
+The resource's friendly name, e.g.
+'Key vault' - a third alternative to -ResourceType/-Alias.
+Required alongside either when an ARM type covers more than one kind of resource, e.g.
+'Microsoft.Web/sites' (Web app vs Function app).
 
 ```yaml
 Type: String
@@ -219,10 +219,9 @@ Accept wildcard characters: False
 ```
 
 ### -Prefix
-One or more strings to prepend to the resource name, in order, e.g.
-a company name, environment,
-or region.
-Falls back to -ConventionPath's value if not specified.
+One or more strings to prepend to the resource name, in order.
+Falls back to -ConventionPath's
+value if not specified.
 
 ```yaml
 Type: String[]
@@ -254,21 +253,12 @@ Accept wildcard characters: False
 ```
 
 ### -Region
-An Azure region to append to the resource name, as its ARM name (e.g.
-'eastus'), display name
-(e.g.
-'East US') or its CAF slug (e.g.
-'eus') - resolved to the CAF-recommended abbreviation the
-same way -ResourceType resolves to -Slug, and inserted after any -Suffix but before an instance
-number, so a -Suffix you specify always comes right after the resource type's slug.
-Already passing the slug in is a no-op that just confirms it's a recognized one.
-Falls back to
--ConventionPath's value if not specified.
-Use Get-CafRegion to look up the abbreviation a given
-region resolves to, or to see every region the module knows about.
-Region abbreviations aren't
-officially published by Microsoft for every region, so an unrecognized value errors rather than
-guessing - pass the code yourself via -Suffix instead if that happens.
+An Azure region (ARM name, display name or CAF slug, e.g.
+'eastus'/'East US'/'eus') to resolve
+and append after any -Suffix.
+Falls back to -ConventionPath's value if not specified.
+Use
+Get-CafRegion to look up supported regions.
 
 ```yaml
 Type: String
@@ -283,10 +273,9 @@ Accept wildcard characters: False
 ```
 
 ### -Separator
-The character(s) used to join the prefix, abbreviation and suffix segments together.
-Ignored for
-resource types that don't permit a separator character, in which case the segments are
-concatenated directly.
+The character(s) used to join the prefix/slug/suffix segments.
+Ignored for resource types that
+don't permit one.
 Defaults to '-', or to -ConventionPath's value if it specifies one.
 
 ```yaml
@@ -301,15 +290,32 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
+### -Casing
+Re-cases every segment of the generated name - -Prefix/-Suffix, the slug and -Region: 'Lower',
+'Upper' or 'Title'.
+Defaults to 'None', or to -ConventionPath's value.
+Overridden by a resource
+type that requires an all-lowercase name.
+Doesn't affect the returned object's Slug property,
+which always reports the canonical CAF abbreviation.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
 ### -InstanceNumber
-An instance number to append to the resource name, for differentiating otherwise-identical
-resources (e.g.
-'vm-sql-test-001', 'vm-sql-test-002' in the Cloud Adoption Framework's own naming
-examples).
-Zero-padded to -InstanceNumberPadding digits and reserved out of the resource type's
-maximum length before the rest of the name is trimmed, so it's never cut short.
-Also accepts
--In as an alias.
+An instance number to append, for differentiating otherwise-identical resources (e.g.
+'vm-sql-test-001').
+Zero-padded to -InstanceNumberPadding digits.
+Also accepts -In.
 
 ```yaml
 Type: Int32
@@ -324,15 +330,10 @@ Accept wildcard characters: False
 ```
 
 ### -InstanceNumberPadding
-The minimum number of digits to zero-pad -InstanceNumber to, e.g.
-the default of 3 formats '1'
-as '001'.
-A number that's already at least this many digits long is left as-is.
-Ignored unless
--InstanceNumber is specified.
-Falls back to -ConventionPath's value if not specified.
-Also
-accepts -Inp as an alias.
+Minimum digits to zero-pad -InstanceNumber to (default 3).
+Falls back to -ConventionPath's
+value if not specified.
+Also accepts -Inp.
 
 ```yaml
 Type: Int32
@@ -347,14 +348,9 @@ Accept wildcard characters: False
 ```
 
 ### -Count
-Generates this many names in one call, with sequential instance numbers, instead of just one.
-Starts from -InstanceNumber if specified (e.g.
--InstanceNumber 5 -Count 3 produces 005, 006, 007),
-or from 1 otherwise.
-Implies an instance number even if -InstanceNumber isn't specified, since
-otherwise every generated name would be identical.
-Each generated name gets its own random
-suffix if -RandomSuffixLength is also specified.
+Generates this many names in one call, with sequential instance numbers starting from
+-InstanceNumber (or 1).
+Each name gets its own random suffix if -RandomSuffixLength is used.
 
 ```yaml
 Type: Int32
@@ -369,17 +365,10 @@ Accept wildcard characters: False
 ```
 
 ### -RandomSuffixLength
-Appends this many random lowercase alphanumeric characters to the end of the name, for
-scenarios that require a globally unique name (such as a storage account or key vault).
-Always
-lowercase, even for a resource type that otherwise allows uppercase - the suffix exists for
-uniqueness, not communication, and doesn't need the extra entropy.
-The characters are reserved
-out of the resource type's maximum length before the rest of the name is trimmed, so the random
-suffix is never cut short.
+Appends this many random lowercase alphanumeric characters, for resource types that need a
+globally-unique name.
 Falls back to -ConventionPath's value if not specified.
-Also
-accepts -Rsl as an alias.
+Also accepts -Rsl.
 
 ```yaml
 Type: Int32
@@ -394,13 +383,8 @@ Accept wildcard characters: False
 ```
 
 ### -RandomSuffixSeed
-Seeds the random number generator used by -RandomSuffixLength, so the same seed (with the same
-other parameters) always produces the same random characters - useful if you need to generate
-the same name idempotently, e.g.
-across repeated deployments.
-Ignored unless -RandomSuffixLength
-is specified.
-Also accepts -Rss as an alias.
+Seeds -RandomSuffixLength's randomness, so the same seed reproduces the same name every time.
+Also accepts -Rss.
 
 ```yaml
 Type: Int32
@@ -415,12 +399,10 @@ Accept wildcard characters: False
 ```
 
 ### -ConventionPath
-Path to a JSON file of organizational naming-convention defaults for -Prefix, -Suffix, -Region,
--Separator, -InstanceNumberPadding and -RandomSuffixLength, created with
-New-CafNamingConvention.
-Any of those you also specify explicitly (including via the
-pipeline) take precedence over the file - this just saves retyping the same org-standard values
-on every call.
+Path to a JSON file of organizational naming-convention defaults (created with
+New-CafNamingConvention) for -Prefix/-Suffix/-Region/-Separator/-Casing/-InstanceNumberPadding/
+-RandomSuffixLength.
+Anything also specified explicitly takes precedence over the file.
 
 ```yaml
 Type: String
@@ -435,10 +417,8 @@ Accept wildcard characters: False
 ```
 
 ### -NoClean
-By default, characters that aren't valid for the given resource type are stripped from -Prefix
-and -Suffix before the name is built.
-Specify -NoClean to pass them through unmodified instead
-(the generated name will then fail validation if it contains invalid characters).
+Skip stripping characters that aren't valid for the resource type from -Prefix/-Suffix (the
+generated name will then fail validation if any remain).
 
 ```yaml
 Type: SwitchParameter

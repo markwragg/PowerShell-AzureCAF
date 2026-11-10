@@ -1,33 +1,25 @@
 # New-CafNamingConvention
 
 ## SYNOPSIS
-Saves a reusable set of Get-CafResourceName defaults (prefix, suffix, region, separator, etc.)
-to a JSON file, so your organization's naming convention doesn't need to be retyped on every
-call.
+Saves a reusable set of Get-CafResourceName defaults to a JSON file, so your organization's
+naming convention doesn't need to be retyped on every call.
 
 ## SYNTAX
 
 ```
 New-CafNamingConvention [-Path] <String> [-Prefix <String[]>] [-Suffix <String[]>] [-Region <String>]
- [-Separator <String>] [-InstanceNumberPadding <Int32>] [-RandomSuffixLength <Int32>] [-Force]
- [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-Separator <String>] [-Casing <String>] [-InstanceNumberPadding <Int32>] [-RandomSuffixLength <Int32>]
+ [-Force] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 Writes a small JSON file that Get-CafResourceName's -ConventionPath reads defaults from for
--Prefix, -Suffix, -Region, -Separator, -InstanceNumberPadding and -RandomSuffixLength.
-Anything
-you pass explicitly to Get-CafResourceName still takes precedence over the file - this is just a
-way to avoid repeating the same organization-standard values (company name, environment, region,
-your preferred separator/padding) on every call.
+-Prefix, -Suffix, -Region, -Separator, -Casing, -InstanceNumberPadding and -RandomSuffixLength.
+Anything also passed explicitly to Get-CafResourceName still takes precedence over the file.
 
--RandomSuffixSeed deliberately isn't one of these defaults, even though Get-CafResourceName has
-it - a convention file is meant to be the same shared values reused verbatim by everyone who
-points -ConventionPath at it, but a seed baked in that way would make the "random" suffix
-identical for every one of those calls, defeating the uniqueness -RandomSuffixLength exists for.
-It only makes sense as a per-call value (e.g.
-for one idempotent redeploy), so it stays something
-you pass to Get-CafResourceName directly.
+-RandomSuffixSeed deliberately isn't included: a shared seed would make the "random" suffix
+identical for everyone using the file, defeating the uniqueness -RandomSuffixLength exists for -
+it only makes sense passed directly, per call.
 
 ## EXAMPLES
 
@@ -66,8 +58,7 @@ Accept wildcard characters: False
 
 ### -Prefix
 One or more strings to use as the default -Prefix, e.g.
-a company name or environment - see the
-naming components guide this links to for what's commonly included.
+a company name or environment.
 
 ```yaml
 Type: String[]
@@ -98,8 +89,7 @@ Accept wildcard characters: False
 
 ### -Region
 An Azure region (ARM name, display name or slug) to use as the default -Region - resolved and
-stored as its ARM region name, the same way Get-CafResourceName resolves it, so an unrecognized
-value is caught here rather than on every later call that uses the file.
+stored as its ARM name, so an unrecognized value is caught here rather than on every later call.
 
 ```yaml
 Type: String
@@ -116,6 +106,23 @@ Accept wildcard characters: False
 ### -Separator
 The default -Separator.
 Omit to leave this to Get-CafResourceName's own default ('-').
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Casing
+The default -Casing ('None', 'Lower', 'Upper' or 'Title').
+Omit to leave this to
+Get-CafResourceName's own default ('None').
 
 ```yaml
 Type: String

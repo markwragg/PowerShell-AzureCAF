@@ -13,19 +13,17 @@ Test-CafResourceName [-Name] <String> [[-ResourceType] <String>] [-Alias <String
 
 ## DESCRIPTION
 Checks a resource name against the same rules Get-CafResourceName enforces when building one:
-minimum/maximum length, required casing, whether the resource type allows a dash, and the
-overall set of valid characters.
-Returns an object showing the pass/fail result of each rule, a
-plain-English Reason when it's invalid, and an overall IsValid result - or just the overall
-true/false with -Quiet.
+minimum/maximum length, required casing, whether a dash is allowed, and the overall set of
+valid characters.
+Returns an object with each rule's pass/fail, a plain-English Reason when
+invalid, and an overall IsValid - or just true/false with -Quiet.
 
-IsValid is the authoritative result (the same validation pattern Get-CafResourceName itself checks
-names against); the other fields are a diagnostic breakdown to help pinpoint why a name failed.
-For a small number of resource types the breakdown can't perfectly add up to IsValid - for
-example a character that's only disallowed as the *first* character of a name is flagged as
-invalid by -ValidCharacters wherever it appears, even though IsValid may still be true if it
-appears elsewhere.
-Treat IsValid as the source of truth.
+IsValid is the authoritative result; the per-rule fields are a diagnostic breakdown that can't
+always add up to it perfectly (e.g.
+a character disallowed only as the *first* character is
+flagged by -ValidCharacters wherever it appears, even if IsValid is still true).
+Treat IsValid
+as the source of truth.
 
 ## EXAMPLES
 
@@ -89,11 +87,7 @@ Accept wildcard characters: False
 ### -ResourceType
 The ARM resource type to test the name against, e.g.
 'Microsoft.Compute/virtualMachines'.
-Matches as a substring by default.
-Normally used on its own (or -Alias, or -Resource, used
-instead); takes precedence if more than one happens to be specified, e.g.
-by piping in an
-object that has ResourceType, Alias and Resource properties all describing the same entry.
+Matches as a substring; takes precedence over -Alias/-Resource if more than one is specified.
 
 ```yaml
 Type: String
@@ -108,12 +102,11 @@ Accept wildcard characters: False
 ```
 
 ### -Alias
-The Cloud Adoption Framework abbreviation to test the name against, e.g.
-'vmss', used as a
-short alias for the ARM resource type.
-Matches as a substring by default, and also accepts
--Slug as an alias.
-Normally used on its own, instead of -ResourceType.
+The CAF abbreviation to test the name against, e.g.
+'vmss' - a shorter alternative to
+-ResourceType (also accepts -Slug).
+Can also disambiguate an ambiguous -ResourceType, the same
+way -Resource does.
 
 ```yaml
 Type: String
@@ -128,14 +121,10 @@ Accept wildcard characters: False
 ```
 
 ### -Resource
-The friendly name of the resource to test against, e.g.
-'Key vault' - every such name in the
-module's data is unique, so on its own this works as a third alternative to -ResourceType/
--Alias (also matching as a substring).
-It also doubles as a disambiguator when combined with
--ResourceType/-Alias, for the handful of ARM types used by more than one kind of resource (for
-example 'Microsoft.Web/sites' covers both a "Web app" and a "Function app") - required in that
-case, since -ResourceType/-Alias alone would otherwise be ambiguous.
+The resource's friendly name, e.g.
+'Key vault' - a third alternative to -ResourceType/-Alias.
+Required alongside either when an ARM type covers more than one kind of resource, e.g.
+'Microsoft.Web/sites' (Web app vs Function app).
 
 ```yaml
 Type: String

@@ -12,15 +12,11 @@ Export-CafResourceType [-Path] <String> [-InputObject <Object[]>] [-Force] [-Pro
 ```
 
 ## DESCRIPTION
-Writes the ResourceType/Resource/Slug/Scope/length/casing fields returned by Get-CafResourceType to
-a file, as a reference table a team can review without running PowerShell - e.g.
-to print, link
-from a wiki page, or attach to a design doc.
-The format is chosen from -Path's extension: .csv
-or .md (.markdown also works).
-
-Accepts the same objects Get-CafResourceType returns on the pipeline, so you can export a filtered
-subset; with nothing piped in, it exports every resource type the module knows about.
+Writes the ResourceType/Resource/Slug/Scope/length/casing fields from Get-CafResourceType to a
+CSV or Markdown file (format chosen from -Path's extension), as a reference table to share
+outside PowerShell.
+Accepts the same objects on the pipeline to export a filtered subset;
+defaults to every resource type if nothing is piped in.
 
 ## EXAMPLES
 

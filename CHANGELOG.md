@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.8.0
+## [0.8.0] - 2026-11-10
 
 * `New-CafResourceName`/`Get-CafResourceName` now accept a `-Casing` parameter (`New-CafNamingConvention` gained a matching default) that re-cases every segment of the generated name - `-Prefix`/`-Suffix`, the resource type's own slug and a resolved `-Region` abbreviation: `'Lower'`, `'Upper'` or `'Title'` (e.g. `-Prefix 'contoso'` with `-Casing Upper` becomes `'CONTOSO-VM'` for a VM), or the default `'None'` to leave everything as given. The `Slug` property on `New-CafResourceName`'s returned object always reports the canonical lowercase CAF abbreviation regardless of `-Casing`, and a resource type that requires an all-lowercase name still overrides it.
 * `New-CafResourceName`/`Get-CafResourceName`/`Test-CafResourceName` - `-Alias` can now also disambiguate an ambiguous `-ResourceType` match, the same way `-Resource` already does (e.g. `-ResourceType Microsoft.Web/sites -Alias func` resolves to the function app instead of erroring as ambiguous). Previously `-Alias` was silently ignored whenever `-ResourceType` was also specified; a conflicting `-Alias` now errors instead of being dropped.
