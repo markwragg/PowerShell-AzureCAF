@@ -10,12 +10,13 @@ function Resolve-CafResourceDefinition {
         exactly one entry - callers should check for a $null/empty result and return without
         continuing.
 
-        -ResourceType takes priority as the primary identifier if given, then -Alias, with -Resource and
-        (when -ResourceType is primary) -Alias both narrowing *within* whichever of those matched (for
-        the handful of types used by more than one kind of resource). When neither -ResourceType nor
-        -Alias is given, -Resource is used as the primary identifier instead - every "Resource" friendly
-        name in resourceDefinition.json happens to be globally unique today, so this only fails if that
-        ever stops being true upstream.
+        -ResourceType takes priority as the primary identifier if given, then -Alias, then
+        -TerraformResourceType, with -Resource and (when -ResourceType/-Alias is primary)
+        -TerraformResourceType all narrowing *within* whichever of those matched (for the handful of
+        types used by more than one kind of resource). When none of -ResourceType/-Alias/
+        -TerraformResourceType is given, -Resource is used as the primary identifier instead - every
+        "Resource" friendly name in resourceDefinition.json happens to be globally unique today, so this
+        only fails if that ever stops being true upstream.
 
         Callers don't need to guard against more than one of -ResourceType/-Alias/-Resource being
         supplied - e.g. piping Get-CafResourceType's output through by property name binds ResourceType,
@@ -34,6 +35,8 @@ function Resolve-CafResourceDefinition {
         Resolve-CafResourceDefinition -ResourceType 'Microsoft.Web/sites' -Alias 'func'
     .EXAMPLE
         Resolve-CafResourceDefinition -Resource 'Key vault'
+    .EXAMPLE
+        Resolve-CafResourceDefinition -TerraformResourceType 'azurerm_storage_account'
     #>
     [CmdletBinding()]
     param(
@@ -44,10 +47,13 @@ function Resolve-CafResourceDefinition {
         $Alias,
 
         [string]
-        $Resource
+        $Resource,
+
+        [string]
+        $TerraformResourceType
     )
 
-    $ResourceIsPrimary = -not $ResourceType -and -not $Alias
+    $ResourceIsPrimary = -not $ResourceType -and -not $Alias -and -not $TerraformResourceType
 
     if ($ResourceType) {
         $identifier = "'$ResourceType'"
@@ -56,6 +62,10 @@ function Resolve-CafResourceDefinition {
     elseif ($Alias) {
         $identifier = "alias '$Alias'"
         $candidates = Select-CafMatch -InputObject @(Get-CafResourceDefinition) -Property Slug -Value $Alias
+    }
+    elseif ($TerraformResourceType) {
+        $identifier = "terraform resource type '$TerraformResourceType'"
+        $candidates = Select-CafMatch -InputObject @(Get-CafResourceDefinition) -Property TerraformResourceType -Value $TerraformResourceType
     }
     else {
         $identifier = "resource '$Resource'"
@@ -74,6 +84,17 @@ function Resolve-CafResourceDefinition {
         if ($candidates.Count -eq 0) {
             $options = ($allCandidates | ForEach-Object { "$($_.ResourceType) [$($_.Resource)]" }) -join "', '"
             Write-Error "'$Alias' doesn't match any resource for $identifier. Available: '$options'."
+            return
+        }
+    }
+
+    if ($TerraformResourceType -and ($ResourceType -or $Alias)) {
+        $allCandidates = $candidates
+        $candidates = Select-CafMatch -InputObject $candidates -Property TerraformResourceType -Value $TerraformResourceType
+
+        if ($candidates.Count -eq 0) {
+            $options = ($allCandidates | ForEach-Object { "$($_.ResourceType) [$($_.Resource)]" }) -join "', '"
+            Write-Error "'$TerraformResourceType' doesn't match any resource for $identifier. Available: '$options'."
             return
         }
     }

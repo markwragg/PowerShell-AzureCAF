@@ -16,6 +16,13 @@ function Get-CafResourceType {
         to disambiguate ARM resource types that cover more than one kind of resource.
     .PARAMETER Alias
         The CAF abbreviation to search for, e.g. 'vm'. Matches as a substring, and also accepts -Slug.
+    .PARAMETER TerraformResourceType
+        The Terraform azurerm resource type to search for, e.g. 'azurerm_storage_account'. Matches as a
+        substring against any value on a resource type's TerraformResourceType property - which is
+        usually a single string, but an array for the handful of resource types with more than one
+        current real azurerm equivalent (e.g. 'azurerm_linux_virtual_machine' and
+        'azurerm_windows_virtual_machine' for a virtual machine); either one resolves it. $null for
+        resource types Terraform doesn't model distinctly.
     .EXAMPLE
         Get-CafResourceType -ResourceType Microsoft.Compute/virtualMachines
 
@@ -28,6 +35,10 @@ function Get-CafResourceType {
         Get-CafResourceType -Alias vm
 
         Finds the resource type(s) that use the 'vm' abbreviation.
+    .EXAMPLE
+        Get-CafResourceType -TerraformResourceType azurerm_storage_account
+
+        Finds the resource type that corresponds to the 'azurerm_storage_account' Terraform resource.
     .EXAMPLE
         Get-CafResourceType
 
@@ -46,7 +57,11 @@ function Get-CafResourceType {
 
         [Alias('Slug')]
         [string]
-        $Alias
+        $Alias,
+
+        [Alias('Tf')]
+        [string]
+        $TerraformResourceType
     )
 
     $definitions = @(Get-CafResourceDefinition)
@@ -63,5 +78,9 @@ function Get-CafResourceType {
         $definitions = Select-CafMatch -InputObject $definitions -Property Slug -Value $Alias
     }
 
-    $definitions | Select-Object ResourceType, Resource, Slug, Scope, MinLength, MaxLength, Lowercase, Dashes
+    if ($TerraformResourceType) {
+        $definitions = Select-CafMatch -InputObject $definitions -Property TerraformResourceType -Value $TerraformResourceType
+    }
+
+    $definitions | Select-Object ResourceType, Resource, Slug, TerraformResourceType, Scope, MinLength, MaxLength, Lowercase, Dashes
 }

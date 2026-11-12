@@ -26,6 +26,12 @@ function Test-CafResourceName {
         The resource's friendly name, e.g. 'Key vault' - a third alternative to -ResourceType/-Alias.
         Required alongside either when an ARM type covers more than one kind of resource, e.g.
         'Microsoft.Web/sites' (Web app vs Function app).
+    .PARAMETER TerraformResourceType
+        The Terraform azurerm resource type to test the name against, e.g. 'azurerm_storage_account' -
+        a fourth alternative to -ResourceType/-Alias/-Resource. A resource type with more than one
+        current real azurerm equivalent (e.g. a virtual machine's Linux/Windows variants) resolves from
+        either one; $null for resource types Terraform doesn't model distinctly. Use Get-CafResourceType
+        to check coverage.
     .PARAMETER Quiet
         Return only an overall $true/$false instead of the full breakdown object.
     .EXAMPLE
@@ -47,6 +53,11 @@ function Test-CafResourceName {
 
         -Resource alone works too, since every friendly name is unique - a third alternative to
         -ResourceType/-Alias for when you only remember the resource's plain-English name.
+    .EXAMPLE
+        Test-CafResourceName -Name 'contoso-st' -TerraformResourceType azurerm_storage_account
+
+        Tests a name identified by its Terraform resource type instead of its ARM type, alias or
+        friendly name - a fourth alternative to -ResourceType/-Alias/-Resource.
     .EXAMPLE
         Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 |
             Test-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Quiet
@@ -78,17 +89,23 @@ function Test-CafResourceName {
         [string]
         $Resource,
 
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Tf')]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $TerraformResourceType,
+
         [switch]
         $Quiet
     )
 
     process {
-        if (-not $ResourceType -and -not $Alias -and -not $Resource) {
-            Write-Error 'Specify -ResourceType, -Alias or -Resource to identify the resource type.'
+        if (-not $ResourceType -and -not $Alias -and -not $Resource -and -not $TerraformResourceType) {
+            Write-Error 'Specify -ResourceType, -Alias, -Resource or -TerraformResourceType to identify the resource type.'
             return
         }
 
-        $definition = Resolve-CafResourceDefinition -ResourceType $ResourceType -Alias $Alias -Resource $Resource
+        $definition = Resolve-CafResourceDefinition -ResourceType $ResourceType -Alias $Alias -Resource $Resource -TerraformResourceType $TerraformResourceType
 
         if (-not $definition) {
             return
@@ -140,16 +157,17 @@ function Test-CafResourceName {
         }
 
         [pscustomobject]@{
-            Name            = $Name
-            ResourceType    = $definition.ResourceType
-            Resource        = $definition.Resource
-            IsValid         = $IsValid
-            Reason          = if ($Reasons.Count -gt 0) { $Reasons -join ' ' } else { $null }
-            MinLength       = $MinLength
-            MaxLength       = $MaxLength
-            Casing          = $Casing
-            Dashes          = $Dashes
-            ValidCharacters = $ValidCharacters
+            Name                  = $Name
+            ResourceType          = $definition.ResourceType
+            Resource              = $definition.Resource
+            TerraformResourceType = $definition.TerraformResourceType
+            IsValid               = $IsValid
+            Reason                = if ($Reasons.Count -gt 0) { $Reasons -join ' ' } else { $null }
+            MinLength             = $MinLength
+            MaxLength             = $MaxLength
+            Casing                = $Casing
+            Dashes                = $Dashes
+            ValidCharacters       = $ValidCharacters
         }
     }
 }

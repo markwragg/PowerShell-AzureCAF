@@ -21,6 +21,12 @@ function Get-CafResourceName {
         The resource's friendly name, e.g. 'Key vault' - a third alternative to -ResourceType/-Alias.
         Required alongside either when an ARM type covers more than one kind of resource, e.g.
         'Microsoft.Web/sites' (Web app vs Function app).
+    .PARAMETER TerraformResourceType
+        The Terraform azurerm resource type to generate a name for, e.g. 'azurerm_storage_account' - a
+        fourth alternative to -ResourceType/-Alias/-Resource. A resource type with more than one
+        current real azurerm equivalent (e.g. a virtual machine's Linux/Windows variants) resolves from
+        either one; $null for resource types Terraform doesn't model distinctly. Use Get-CafResourceType
+        to check coverage.
     .PARAMETER Prefix
         One or more strings to prepend to the resource name, in order. Falls back to -ConventionPath's
         value if not specified.
@@ -80,6 +86,11 @@ function Get-CafResourceName {
 
         -Resource alone works too, since every friendly name is unique - a third alternative to
         -ResourceType/-Alias for when you only remember the resource's plain-English name.
+    .EXAMPLE
+        Get-CafResourceName -TerraformResourceType azurerm_storage_account -Prefix contoso -RandomSuffixLength 6
+
+        Generates a storage account name identified by its Terraform resource type instead of its ARM
+        type, alias or friendly name - a fourth alternative to -ResourceType/-Alias/-Resource.
     .EXAMPLE
         Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
 
@@ -156,6 +167,12 @@ function Get-CafResourceName {
         $Resource,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Tf')]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $TerraformResourceType,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
         $Prefix,
 
@@ -216,7 +233,7 @@ function Get-CafResourceName {
         # Every parameter above exists only to be bound and forwarded to New-CafResourceName via the
         # proxy-command plumbing below (for CmdletBinding/tab-completion/help purposes), never read
         # directly here - this satisfies PSScriptAnalyzer's PSReviewUnusedParameter rule.
-        $null = $ResourceType, $Alias, $Resource, $Prefix, $Suffix, $Region, $Separator, $Casing, $InstanceNumber,
+        $null = $ResourceType, $Alias, $Resource, $TerraformResourceType, $Prefix, $Suffix, $Region, $Separator, $Casing, $InstanceNumber,
         $InstanceNumberPadding, $Count, $RandomSuffixLength, $RandomSuffixSeed, $ConventionPath, $NoClean
 
         # A hand-rolled `New-CafResourceName @PSBoundParameters` here would be unsafe: $PSBoundParameters

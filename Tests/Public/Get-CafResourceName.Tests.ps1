@@ -73,5 +73,10 @@ Describe 'Get-CafResourceName' {
             Get-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -In 1 -Inp 2 |
                 Should -Be (New-CafResourceName -ResourceType 'Microsoft.Compute/virtualMachines' -Prefix 'contoso' -InstanceNumber 1 -InstanceNumberPadding 2).Name
         }
+
+        It 'Accepts -TerraformResourceType, same as New-CafResourceName' {
+            Get-CafResourceName -TerraformResourceType 'azurerm_storage_account' -Prefix 'contoso' |
+                Should -Be (New-CafResourceName -TerraformResourceType 'azurerm_storage_account' -Prefix 'contoso').Name
+        }
     }
 }

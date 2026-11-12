@@ -61,7 +61,7 @@ Except for `{type}`, this module does not prescribe the use of any of the above 
 
 | Segment | Parameter/s | Description |
 | --- | --- | --- |
-| `{type}` | `‑ResourceType`<br>`‑Resource`<br>`‑Alias` | (Required) The ARM resource type's CAF abbreviation (also known as `slug`). `-Resource` is sometimes required alongside `‑ResourceType` to avoid ambiguity; `-Alias` is a shorter alternative if you already know the abbreviation. |
+| `{type}` | `‑ResourceType`<br>`‑Resource`<br>`‑Alias`<br>`‑TerraformResourceType` | (Required) The ARM resource type's CAF abbreviation (also known as `slug`). `-Resource` is sometimes required alongside `‑ResourceType` to avoid ambiguity; `-Alias` is a shorter alternative if you already know the abbreviation; `-TerraformResourceType` identifies it by its Terraform `azurerm_*` resource type instead, where one exists. |
 | `{separator}` | `‑Separator` | The character(s) to use between each naming segment. `-` by default (except where a resource type does not permit the character). Specify `''` for no separator at all. |
 | `{prefix}` | `-Prefix` | One or more strings appended before `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
 | `{suffix}` | `‑Suffix` | One or more strings appended after `{type}`, joined via `{separator}`. This could be company, workload, environment etc. |
@@ -76,7 +76,7 @@ By default, this will be randomly generated each time the cmdlet is called. If y
 
 ### Generate a resource name
 
-`Get-CafResourceName` builds a name by combining zero or more prefixes, the CAF-recommended abbreviation for an Azure resource type, zero or more suffixes, an optional instance number and random string - checking the result against that resource type's length limit and allowed characters along the way. `Get-CafResourceName` returns only the resource name, as a string. Use `New-CafResourceName` to return a PowerShell object with `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` properties instead (see the batch-generation example below).
+`Get-CafResourceName` builds a name by combining zero or more prefixes, the CAF-recommended abbreviation for an Azure resource type, zero or more suffixes, an optional instance number and random string - checking the result against that resource type's length limit and allowed characters along the way. `Get-CafResourceName` returns only the resource name, as a string. Use `New-CafResourceName` to return a PowerShell object with `Name`/`ResourceType`/`Resource`/`Slug`/`TerraformResourceType`/`InstanceNumber`/`RandomSuffix` properties instead (see the batch-generation example below).
 
 The default parameter to identify the resource is `-ResourceType`:
 
@@ -114,7 +114,18 @@ Get-CafResourceName -Alias vm -Suffix contoso,prod
 vm-contoso-prod
 ```
 
-> Use `Get-CafResourceType` to list all available `ResourceType`/`Resource`/`Slug` (Alias) options, along with their naming restriction rules.
+If you work primarily in Terraform, you can identify the resource by its `azurerm_*` resource type instead, via `-TerraformResourceType` (Alias: `-Tf`):
+
+```powershell
+Get-CafResourceName -TerraformResourceType azurerm_storage_account -Prefix contoso -RandomSuffixLength 6
+```
+```text
+contosostabcdef
+```
+
+> `TerraformResourceType` is usually a single string, but an array for the handful of resource types with more than one current real `azurerm` equivalent (e.g. `azurerm_linux_virtual_machine` and `azurerm_windows_virtual_machine` for a virtual machine) - `-TerraformResourceType` resolves the row from either one. It's `$null` for resource types Terraform doesn't model distinctly (e.g. most Azure Policy resources).
+
+> Use `Get-CafResourceType` to list all available `ResourceType`/`Resource`/`Slug` (Alias)/`TerraformResourceType` options, along with their naming restriction rules.
 
 If you need to number your resource, use `-InstanceNumber` (Alias: `-In`) to append a number to the end of the resource name (zero-padded to 3 digits by default):
 
@@ -229,7 +240,7 @@ CONTOSO-PROD-VM
 Import-Csv ./resources.csv | Get-CafResourceName
 ```
 
-Batch-generating like this returns bare strings, which lose track of which input row (or which `-Count` iteration) produced which name. Use `New-CafResourceName` instead to get back a `Name`/`ResourceType`/`Resource`/`Slug`/`InstanceNumber`/`RandomSuffix` object - handy for exporting alongside the values that produced each name:
+Batch-generating like this returns bare strings, which lose track of which input row (or which `-Count` iteration) produced which name. Use `New-CafResourceName` instead to get back a `Name`/`ResourceType`/`Resource`/`Slug`/`TerraformResourceType`/`InstanceNumber`/`RandomSuffix` object - handy for exporting alongside the values that produced each name:
 
 ```powershell
 Import-Csv ./resources.csv | New-CafResourceName | Export-Csv ./generated-names.csv
@@ -313,6 +324,7 @@ Name must be all lowercase for this resource type.
 Get-CafResourceType -ResourceType *storageAccount*
 Get-CafResourceType -Alias kv
 Get-CafResourceType -Resource 'Key vault' | Get-CafResourceName -Prefix contoso -RandomSuffixLength 4
+Get-CafResourceType -TerraformResourceType azurerm_storage_account
 ```
 
 Export it as a reference table for sharing outside PowerShell with `Export-CafResourceType` - the format (CSV or Markdown) is chosen from `-Path`'s extension:

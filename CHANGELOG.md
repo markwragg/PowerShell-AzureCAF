@@ -1,5 +1,9 @@
 # Change Log
 
+## !Deploy 0.9.0
+
+* `Get-CafResourceType`/`New-CafResourceName`/`Get-CafResourceName`/`Test-CafResourceName` now accept a `-TerraformResourceType` parameter (alias `-Tf`) that identifies a resource type by its Terraform `azurerm_*` resource type (e.g. `-TerraformResourceType azurerm_storage_account`) instead of its ARM type, CAF alias or friendly name - resolved the same way as the existing identifiers, including tab completion and `-Resource` disambiguation. The `TerraformResourceType` field is usually a single string, but an array for the handful of resource types with more than one current real `azurerm` equivalent (e.g. `azurerm_linux_virtual_machine`/`azurerm_windows_virtual_machine` for a virtual machine, or the Linux/Windows/flex-consumption function app resources) - any one of them resolves the row; it's `$null` for types Terraform doesn't model distinctly. `Export-CafResourceType` and the objects returned by `New-CafResourceName`/`Test-CafResourceName` now include this field alongside `ResourceType`/`Resource`/`Slug`, joined with `; ` in the CSV/Markdown export when it's an array.
+
 ## [0.8.0] - 2026-11-10
 
 * `New-CafResourceName`/`Get-CafResourceName` now accept a `-Casing` parameter (`New-CafNamingConvention` gained a matching default) that re-cases every segment of the generated name - `-Prefix`/`-Suffix`, the resource type's own slug and a resolved `-Region` abbreviation: `'Lower'`, `'Upper'` or `'Title'` (e.g. `-Prefix 'contoso'` with `-Casing Upper` becomes `'CONTOSO-VM'` for a VM), or the default `'None'` to leave everything as given. The `Slug` property on `New-CafResourceName`'s returned object always reports the canonical lowercase CAF abbreviation regardless of `-Casing`, and a resource type that requires an all-lowercase name still overrides it.

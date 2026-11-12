@@ -4,10 +4,13 @@ function Export-CafResourceType {
         Exports the Cloud Adoption Framework naming rules for one or more resource types to a CSV or
         Markdown file.
     .DESCRIPTION
-        Writes the ResourceType/Resource/Slug/Scope/length/casing fields from Get-CafResourceType to a
-        CSV or Markdown file (format chosen from -Path's extension), as a reference table to share
-        outside PowerShell. Accepts the same objects on the pipeline to export a filtered subset;
-        defaults to every resource type if nothing is piped in.
+        Writes the ResourceType/Resource/Slug/TerraformResourceType/Scope/length/casing fields from
+        Get-CafResourceType to a CSV or Markdown file (format chosen from -Path's extension), as a
+        reference table to share outside PowerShell. Accepts the same objects on the pipeline to export
+        a filtered subset; defaults to every resource type if nothing is piped in. TerraformResourceType
+        is joined with '; ' in the export when a resource type has more than one real azurerm
+        equivalent (e.g. a VM's Linux/Windows variants), since neither CSV nor Markdown cells hold a
+        list natively.
     .PARAMETER Path
         Where to write the export. Must end in .csv, .md or .markdown.
     .PARAMETER InputObject
@@ -73,17 +76,26 @@ function Export-CafResourceType {
             return
         }
 
-        $Properties = 'ResourceType', 'Resource', 'Slug', 'Scope', 'MinLength', 'MaxLength', 'Lowercase', 'Dashes'
+        $Properties = 'ResourceType', 'Resource', 'Slug', 'TerraformResourceType', 'Scope', 'MinLength', 'MaxLength', 'Lowercase', 'Dashes'
+
+        # TerraformResourceType is a single string for most resource types, but an array for the
+        # handful where more than one real azurerm resource applies (e.g. a VM's Linux/Windows
+        # variants) - joined here so both export formats get a readable, delimited cell instead of
+        # Export-Csv's literal 'System.Object[]' or Markdown's default space-joined interpolation.
+        $ExportItems = $Items | Select-Object -Property $Properties | ForEach-Object {
+            $_.TerraformResourceType = $_.TerraformResourceType -join '; '
+            $_
+        }
 
         if ($Extension -eq '.csv') {
-            $Items | Select-Object -Property $Properties | Export-Csv -Path $Path -NoTypeInformation
+            $ExportItems | Export-Csv -Path $Path -NoTypeInformation
         }
         else {
             $Lines = [System.Collections.Generic.List[string]]::new()
             $Lines.Add("| $($Properties -join ' | ') |")
             $Lines.Add("| $(($Properties | ForEach-Object { '---' }) -join ' | ') |")
 
-            foreach ($Item in $Items) {
+            foreach ($Item in $ExportItems) {
                 $Cells = foreach ($Property in $Properties) {
                     "$($Item.$Property)".Replace('|', '\|')
                 }

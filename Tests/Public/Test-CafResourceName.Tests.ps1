@@ -165,8 +165,34 @@ Describe 'Test-CafResourceName' {
             (Test-CafResourceName -Name 'contoso-kv' -Resource 'Key vault').IsValid | Should -BeTrue
         }
 
-        It 'Errors when none of -ResourceType, -Alias or -Resource are specified' {
+        It 'Errors when none of -ResourceType, -Alias, -Resource or -TerraformResourceType are specified' {
             { Test-CafResourceName -Name 'contoso' -ErrorAction Stop } | Should -Throw
+        }
+    }
+
+    Context 'Resolving by Terraform resource type' {
+
+        It 'Resolves the resource type from -TerraformResourceType' {
+            (Test-CafResourceName -Name 'contosost' -TerraformResourceType 'azurerm_storage_account').IsValid | Should -BeTrue
+        }
+
+        It 'Resolves the resource type from the -Tf alias' {
+            (Test-CafResourceName -Name 'contosost' -Tf 'azurerm_storage_account').IsValid | Should -BeTrue
+        }
+
+        It 'Errors for an unknown -TerraformResourceType value' {
+            { Test-CafResourceName -Name 'contoso' -TerraformResourceType 'azurerm_does_not_exist' -ErrorAction Stop } | Should -Throw
+        }
+
+        It 'Includes TerraformResourceType on the returned object' {
+            (Test-CafResourceName -Name 'contosost' -TerraformResourceType 'azurerm_storage_account').TerraformResourceType |
+                Should -Be 'azurerm_storage_account'
+        }
+
+        It 'Resolves by any one of several real Terraform equivalents, and returns all of them on the result' {
+            $Result = Test-CafResourceName -Name 'contoso-vm' -TerraformResourceType 'azurerm_linux_virtual_machine'
+            $Result.IsValid | Should -BeTrue
+            $Result.TerraformResourceType | Should -Be @('azurerm_linux_virtual_machine', 'azurerm_windows_virtual_machine')
         }
     }
 

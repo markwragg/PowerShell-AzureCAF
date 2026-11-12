@@ -33,6 +33,22 @@ $SlugCompleter = {
         ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_) }
 }
 
+$TerraformResourceTypeCompleter = {
+    param($CommandName, $ParameterName, $WordToComplete, $CommandAst, $FakeBoundParameters)
+    $null = $CommandName, $ParameterName, $CommandAst, $FakeBoundParameters
+    # Substring match, same as the cmdlets' own -TerraformResourceType partial matching. Many entries
+    # have no Terraform equivalent ($null), so those are filtered out before completing. Piping an
+    # array-valued property (the handful of entries with more than one real azurerm equivalent, e.g.
+    # a VM's Linux/Windows variants) flattens it automatically, so each name is still offered on its
+    # own rather than as one combined completion.
+    $Pattern = Get-CafWildcardPattern -Value $WordToComplete
+    (Get-CafResourceDefinition).TerraformResourceType |
+        Where-Object { $_ } |
+        Select-Object -Unique |
+        Where-Object { $_ -like $Pattern } |
+        ForEach-Object { [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_) }
+}
+
 $ResourceCompleter = {
     param($CommandName, $ParameterName, $WordToComplete, $CommandAst, $FakeBoundParameters)
     $null = $CommandName, $ParameterName, $CommandAst
@@ -49,6 +65,9 @@ $ResourceCompleter = {
     }
     elseif ($FakeBoundParameters.Alias) {
         $Definitions = Select-CafMatch -InputObject $Definitions -Property Slug -Value $FakeBoundParameters.Alias
+    }
+    elseif ($FakeBoundParameters.TerraformResourceType) {
+        $Definitions = Select-CafMatch -InputObject $Definitions -Property TerraformResourceType -Value $FakeBoundParameters.TerraformResourceType
     }
 
     $Pattern = Get-CafWildcardPattern -Value $WordToComplete
@@ -81,4 +100,5 @@ $RegionCompleter = {
 Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'ResourceType' -ScriptBlock $ResourceTypeCompleter
 Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Alias' -ScriptBlock $SlugCompleter
 Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'Resource' -ScriptBlock $ResourceCompleter
+Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Test-CafResourceName', 'Get-CafResourceType' -ParameterName 'TerraformResourceType' -ScriptBlock $TerraformResourceTypeCompleter
 Register-ArgumentCompleter -CommandName 'Get-CafResourceName', 'New-CafResourceName', 'Get-CafRegion' -ParameterName 'Region' -ScriptBlock $RegionCompleter

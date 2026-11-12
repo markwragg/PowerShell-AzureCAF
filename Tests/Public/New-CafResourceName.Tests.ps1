@@ -433,8 +433,46 @@ Describe 'New-CafResourceName' {
             { New-CafResourceName -Resource 'vault' -ErrorAction Stop } | Should -Throw
         }
 
-        It 'Errors when none of -ResourceType, -Alias or -Resource are specified' {
+        It 'Errors when none of -ResourceType, -Alias, -Resource or -TerraformResourceType are specified' {
             { New-CafResourceName -Prefix 'contoso' -ErrorAction Stop } | Should -Throw
+        }
+    }
+
+    Context 'Resolving by Terraform resource type' {
+
+        It 'Resolves the resource type from -TerraformResourceType' {
+            (New-CafResourceName -TerraformResourceType 'azurerm_storage_account' -Prefix 'contoso').Name |
+                Should -Be 'contosost'
+        }
+
+        It 'Resolves the resource type from the -Tf alias' {
+            (New-CafResourceName -Tf 'azurerm_storage_account' -Prefix 'contoso').Name |
+                Should -Be 'contosost'
+        }
+
+        It 'Matches -TerraformResourceType as a substring' {
+            (New-CafResourceName -TerraformResourceType 'storage_account' -Prefix 'contoso').Name |
+                Should -Be 'contosost'
+        }
+
+        It 'Errors for an unknown -TerraformResourceType value' {
+            { New-CafResourceName -TerraformResourceType 'azurerm_does_not_exist' -ErrorAction Stop } | Should -Throw
+        }
+
+        It 'Includes TerraformResourceType on the returned object' {
+            (New-CafResourceName -TerraformResourceType 'azurerm_storage_account' -Prefix 'contoso').TerraformResourceType |
+                Should -Be 'azurerm_storage_account'
+        }
+
+        It 'Returns a $null TerraformResourceType when resolved by a resource type with no Terraform equivalent' {
+            (New-CafResourceName -ResourceType 'Microsoft.Blockchain/blockchainMembers' -Prefix 'contoso').TerraformResourceType |
+                Should -BeNullOrEmpty
+        }
+
+        It 'Resolves by any one of several real Terraform equivalents, and returns all of them on the result' {
+            $Result = New-CafResourceName -TerraformResourceType 'azurerm_windows_virtual_machine' -Prefix 'contoso'
+            $Result.Name | Should -Be 'contoso-vm'
+            $Result.TerraformResourceType | Should -Be @('azurerm_linux_virtual_machine', 'azurerm_windows_virtual_machine')
         }
     }
 

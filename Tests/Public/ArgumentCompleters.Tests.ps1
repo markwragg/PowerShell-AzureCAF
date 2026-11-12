@@ -68,6 +68,38 @@ Describe 'Argument completers' {
             $Matches = Complete-Line "Get-CafResourceName -Alias afd -Resource "
             $Matches.ListItemText | Sort-Object | Should -Be @('Front Door (classic)', 'Front Door (Standard/Premium) profile')
         }
+
+        It 'Narrows to just the friendly names for an already-typed -TerraformResourceType' {
+            $Matches = Complete-Line "Get-CafResourceName -TerraformResourceType azurerm_cosmosdb_account -Resource "
+            $Matches.ListItemText | Sort-Object | Should -Be @(
+                'Azure Cosmos DB for Apache Cassandra account', 'Azure Cosmos DB for Apache Gremlin account',
+                'Azure Cosmos DB for MongoDB account', 'Azure Cosmos DB for NoSQL account', 'Azure Cosmos DB for Table account'
+            )
+        }
+    }
+
+    Context 'Get-CafResourceName -TerraformResourceType' {
+
+        It 'Offers every known, non-null Terraform resource type when nothing has been typed yet' {
+            $Matches = Complete-Line "Get-CafResourceName -TerraformResourceType "
+            $Matches.Count | Should -BeGreaterThan 100
+        }
+
+        It 'Matches as a substring' {
+            $Matches = Complete-Line "Get-CafResourceName -TerraformResourceType storage_acc"
+            $Matches.CompletionText | Should -Contain 'azurerm_storage_account'
+        }
+
+        It 'Never offers a null/empty completion for entries with no Terraform equivalent' {
+            $Matches = Complete-Line "Get-CafResourceName -TerraformResourceType "
+            $Matches.CompletionText | Should -Not -Contain ''
+        }
+
+        It 'Offers each real equivalent individually for a resource type with more than one, not the array as a whole' {
+            $Matches = Complete-Line "Get-CafResourceName -TerraformResourceType azurerm_linux_virtual_machine"
+            $Matches.CompletionText | Should -Contain 'azurerm_linux_virtual_machine'
+            $Matches.CompletionText | Should -Not -Contain 'azurerm_linux_virtual_machine azurerm_windows_virtual_machine'
+        }
     }
 
     Context 'Get-CafResourceName -Region' {

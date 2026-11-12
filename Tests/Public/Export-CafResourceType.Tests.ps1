@@ -26,6 +26,15 @@ Describe 'Export-CafResourceType' {
             $Rows | Should -HaveCount 1
             $Rows[0].ResourceType | Should -Be 'Microsoft.KeyVault/vaults'
             $Rows[0].Slug | Should -Be 'kv'
+            $Rows[0].TerraformResourceType | Should -Be 'azurerm_key_vault'
+        }
+
+        It 'Joins an array-valued TerraformResourceType with a semicolon rather than exporting the raw type name' {
+            $Path = Join-Path $TestDrive 'vm.csv'
+            Get-CafResourceType -ResourceType 'Microsoft.Compute/virtualMachines' | Export-CafResourceType -Path $Path
+
+            (Import-Csv -Path $Path)[0].TerraformResourceType |
+                Should -Be 'azurerm_linux_virtual_machine; azurerm_windows_virtual_machine'
         }
     }
 
@@ -40,6 +49,13 @@ Describe 'Export-CafResourceType' {
             $Lines[1] | Should -Match '^\| --- \| --- \|'
             $Lines[2] | Should -Match 'Microsoft\.KeyVault/vaults'
             $Lines.Count | Should -Be 3
+        }
+
+        It 'Joins an array-valued TerraformResourceType with a semicolon in the Markdown cell' {
+            $Path = Join-Path $TestDrive 'vm.md'
+            Get-CafResourceType -ResourceType 'Microsoft.Compute/virtualMachines' | Export-CafResourceType -Path $Path
+
+            (Get-Content -Path $Path)[2] | Should -Match 'azurerm_linux_virtual_machine; azurerm_windows_virtual_machine'
         }
 
         It 'Accepts a .markdown extension too' {

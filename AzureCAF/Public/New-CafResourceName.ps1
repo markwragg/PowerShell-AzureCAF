@@ -8,8 +8,9 @@ function New-CafResourceName {
         Azure resource type, and an optional suffix - trimmed, cleaned and cased to fit that resource
         type's length limit, allowed characters and casing rules.
 
-        Returns an object with Name, ResourceType, Resource, Slug, InstanceNumber and RandomSuffix
-        properties - use Get-CafResourceName instead for just the name as a plain string. Accepts
+        Returns an object with Name, ResourceType, Resource, Slug, TerraformResourceType, InstanceNumber
+        and RandomSuffix properties - use Get-CafResourceName instead for just the name as a plain
+        string. Accepts
         pipeline input by property name, so a list of resource specs (e.g. from a CSV) can be batch-
         generated in one call - see the pipeline example below. Use Get-CafResourceType to discover the
         accepted ResourceType/Resource values, and -Verbose to see the length-budget reasoning behind a
@@ -26,6 +27,12 @@ function New-CafResourceName {
         The resource's friendly name, e.g. 'Key vault' - a third alternative to -ResourceType/-Alias.
         Required alongside either when an ARM type covers more than one kind of resource, e.g.
         'Microsoft.Web/sites' (Web app vs Function app).
+    .PARAMETER TerraformResourceType
+        The Terraform azurerm resource type to generate a name for, e.g. 'azurerm_storage_account' - a
+        fourth alternative to -ResourceType/-Alias/-Resource. A resource type with more than one
+        current real azurerm equivalent (e.g. a virtual machine's Linux/Windows variants) resolves from
+        either one; $null for resource types Terraform doesn't model distinctly. Use Get-CafResourceType
+        to check coverage.
     .PARAMETER Prefix
         One or more strings to prepend to the resource name, in order. Falls back to -ConventionPath's
         value if not specified.
@@ -70,7 +77,7 @@ function New-CafResourceName {
         New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Suffix 01
 
         Generates a virtual machine name such as 'contoso-prod-vm-01', returned as an object with Name,
-        ResourceType, Resource, Slug, InstanceNumber and RandomSuffix properties.
+        ResourceType, Resource, Slug, TerraformResourceType, InstanceNumber and RandomSuffix properties.
     .EXAMPLE
         New-CafResourceName -ResourceType KeyVault -Prefix contoso
 
@@ -87,6 +94,11 @@ function New-CafResourceName {
 
         -Resource alone works too, since every friendly name is unique - a third alternative to
         -ResourceType/-Alias for when you only remember the resource's plain-English name.
+    .EXAMPLE
+        New-CafResourceName -TerraformResourceType azurerm_storage_account -Prefix contoso -RandomSuffixLength 6
+
+        Generates a storage account name identified by its Terraform resource type instead of its ARM
+        type, alias or friendly name - a fourth alternative to -ResourceType/-Alias/-Resource.
     .EXAMPLE
         New-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
 
@@ -140,10 +152,11 @@ function New-CafResourceName {
     .EXAMPLE
         Import-Csv ./resources.csv | New-CafResourceName | Export-Csv ./generated-names.csv
 
-        Batch-generates a name for every row of resources.csv, which needs at least a ResourceType or
-        Alias column, and may also have Resource/Prefix/Suffix/Separator/InstanceNumber columns. The
-        ResourceType/Resource/Slug/InstanceNumber/RandomSuffix that produced each name is kept alongside
-        it, rather than returning bare strings that lose track of which input row (or which -Count
+        Batch-generates a name for every row of resources.csv, which needs at least a ResourceType,
+        Alias or TerraformResourceType column, and may also have Resource/Prefix/Suffix/Separator/
+        InstanceNumber columns. The ResourceType/Resource/Slug/TerraformResourceType/InstanceNumber/
+        RandomSuffix that produced each name is kept alongside it, rather than returning bare strings
+        that lose track of which input row (or which -Count
         iteration) each one came from.
     .LINK
         https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
@@ -166,6 +179,12 @@ function New-CafResourceName {
         [ValidateNotNullOrEmpty()]
         [string]
         $Resource,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('Tf')]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $TerraformResourceType,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
@@ -279,12 +298,12 @@ function New-CafResourceName {
     }
 
     process {
-        if (-not $ResourceType -and -not $Alias -and -not $Resource) {
-            Write-Error 'Specify -ResourceType, -Alias or -Resource to identify the resource type.'
+        if (-not $ResourceType -and -not $Alias -and -not $Resource -and -not $TerraformResourceType) {
+            Write-Error 'Specify -ResourceType, -Alias, -Resource or -TerraformResourceType to identify the resource type.'
             return
         }
 
-        $definition = Resolve-CafResourceDefinition -ResourceType $ResourceType -Alias $Alias -Resource $Resource
+        $definition = Resolve-CafResourceDefinition -ResourceType $ResourceType -Alias $Alias -Resource $Resource -TerraformResourceType $TerraformResourceType
 
         if (-not $definition) {
             return
@@ -441,12 +460,13 @@ function New-CafResourceName {
             else {
                 Write-Verbose "Final result: '$FinalName'."
                 [pscustomobject]@{
-                    Name           = $FinalName
-                    ResourceType   = $definition.ResourceType
-                    Resource       = $definition.Resource
-                    Slug           = $definition.Slug
-                    InstanceNumber = if ($HasInstanceNumber) { $InstanceCounter } else { $null }
-                    RandomSuffix   = if ($EffectiveRandomSuffixLength -gt 0) { $RandomSuffix } else { $null }
+                    Name                  = $FinalName
+                    ResourceType          = $definition.ResourceType
+                    Resource              = $definition.Resource
+                    Slug                  = $definition.Slug
+                    TerraformResourceType = $definition.TerraformResourceType
+                    InstanceNumber        = if ($HasInstanceNumber) { $InstanceCounter } else { $null }
+                    RandomSuffix          = if ($EffectiveRandomSuffixLength -gt 0) { $RandomSuffix } else { $null }
                 }
             }
         }
