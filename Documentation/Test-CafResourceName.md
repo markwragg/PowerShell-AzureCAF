@@ -8,7 +8,7 @@ resource type.
 
 ```
 Test-CafResourceName [-Name] <String> [[-ResourceType] <String>] [-Alias <String>] [-Resource <String>]
- [-Quiet] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-TerraformResourceType <String>] [-Quiet] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -59,6 +59,14 @@ Test-CafResourceName -Name 'contoso-kv' -Resource 'Key vault'
 -ResourceType/-Alias for when you only remember the resource's plain-English name.
 
 ### EXAMPLE 5
+```
+Test-CafResourceName -Name 'contoso-st' -TerraformResourceType azurerm_storage_account
+```
+
+Tests a name identified by its Terraform resource type instead of its ARM type, alias or
+friendly name - a fourth alternative to -ResourceType/-Alias/-Resource.
+
+### EXAMPLE 6
 ```
 Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 |
     Test-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Quiet
@@ -130,6 +138,29 @@ Required alongside either when an ARM type covers more than one kind of resource
 Type: String
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -TerraformResourceType
+The Terraform azurerm resource type to test the name against, e.g.
+'azurerm_storage_account' -
+a fourth alternative to -ResourceType/-Alias/-Resource.
+A resource type with more than one
+current real azurerm equivalent (e.g.
+a virtual machine's Linux/Windows variants) resolves from
+either one; $null for resource types Terraform doesn't model distinctly.
+Use Get-CafResourceType
+to check coverage.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: Tf
 
 Required: False
 Position: Named

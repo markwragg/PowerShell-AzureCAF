@@ -7,7 +7,7 @@ Looks up the Cloud Adoption Framework naming rules for one or more Azure resourc
 
 ```
 Get-CafResourceType [[-ResourceType] <String>] [-Resource <String>] [-Alias <String>]
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-TerraformResourceType <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -41,6 +41,13 @@ Get-CafResourceType -Alias vm
 Finds the resource type(s) that use the 'vm' abbreviation.
 
 ### EXAMPLE 4
+```
+Get-CafResourceType -TerraformResourceType azurerm_storage_account
+```
+
+Finds the resource type that corresponds to the 'azurerm_storage_account' Terraform resource.
+
+### EXAMPLE 5
 ```
 Get-CafResourceType
 ```
@@ -97,6 +104,30 @@ Matches as a substring, and also accepts -Slug.
 Type: String
 Parameter Sets: (All)
 Aliases: Slug
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TerraformResourceType
+The Terraform azurerm resource type to search for, e.g.
+'azurerm_storage_account'.
+Matches as a
+substring against any value on a resource type's TerraformResourceType property - which is
+usually a single string, but an array for the handful of resource types with more than one
+current real azurerm equivalent (e.g.
+'azurerm_linux_virtual_machine' and
+'azurerm_windows_virtual_machine' for a virtual machine); either one resolves it.
+$null for
+resource types Terraform doesn't model distinctly.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: Tf
 
 Required: False
 Position: Named

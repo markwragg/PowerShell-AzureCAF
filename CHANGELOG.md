@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 0.9.0
+## [0.9.0] - 2026-11-12
 
 * `Get-CafResourceType`/`New-CafResourceName`/`Get-CafResourceName`/`Test-CafResourceName` now accept a `-TerraformResourceType` parameter (alias `-Tf`) that identifies a resource type by its Terraform `azurerm_*` resource type (e.g. `-TerraformResourceType azurerm_storage_account`) instead of its ARM type, CAF alias or friendly name - resolved the same way as the existing identifiers, including tab completion and `-Resource` disambiguation. The `TerraformResourceType` field is usually a single string, but an array for the handful of resource types with more than one current real `azurerm` equivalent (e.g. `azurerm_linux_virtual_machine`/`azurerm_windows_virtual_machine` for a virtual machine, or the Linux/Windows/flex-consumption function app resources) - any one of them resolves the row; it's `$null` for types Terraform doesn't model distinctly. `Export-CafResourceType` and the objects returned by `New-CafResourceName`/`Test-CafResourceName` now include this field alongside `ResourceType`/`Resource`/`Slug`, joined with `; ` in the CSV/Markdown export when it's an array.
 

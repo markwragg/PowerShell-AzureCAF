@@ -12,11 +12,16 @@ Export-CafResourceType [-Path] <String> [-InputObject <Object[]>] [-Force] [-Pro
 ```
 
 ## DESCRIPTION
-Writes the ResourceType/Resource/Slug/Scope/length/casing fields from Get-CafResourceType to a
-CSV or Markdown file (format chosen from -Path's extension), as a reference table to share
-outside PowerShell.
-Accepts the same objects on the pipeline to export a filtered subset;
-defaults to every resource type if nothing is piped in.
+Writes the ResourceType/Resource/Slug/TerraformResourceType/Scope/length/casing fields from
+Get-CafResourceType to a CSV or Markdown file (format chosen from -Path's extension), as a
+reference table to share outside PowerShell.
+Accepts the same objects on the pipeline to export
+a filtered subset; defaults to every resource type if nothing is piped in.
+TerraformResourceType
+is joined with '; ' in the export when a resource type has more than one real azurerm
+equivalent (e.g.
+a VM's Linux/Windows variants), since neither CSV nor Markdown cells hold a
+list natively.
 
 ## EXAMPLES
 
