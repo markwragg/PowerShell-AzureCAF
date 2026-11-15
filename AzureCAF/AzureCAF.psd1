@@ -98,13 +98,13 @@ PrivateData = @{
         Tags = 'Azure','CAF','Naming','CloudAdoptionFramework'
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/markwragg/PowerShell-AzureCAF/blob/main/LICENSE'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/markwragg/PowerShell-AzureCAF'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://raw.githubusercontent.com/markwragg/PowerShell-AzureCAF/master/azurecaf-logo.png'
 
         # ReleaseNotes of this module
         ReleaseNotes = 'https://github.com/markwragg/PowerShell-AzureCAF/blob/main/CHANGELOG.md'
