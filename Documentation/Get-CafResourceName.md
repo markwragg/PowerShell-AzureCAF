@@ -7,10 +7,11 @@ returning just the name as a string.
 ## SYNTAX
 
 ```
-Get-CafResourceName [[-ResourceType] <String>] [-Alias <String>] [-Resource <String>] [-Prefix <String[]>]
- [-Suffix <String[]>] [-Region <String>] [-Separator <String>] [-Casing <String>] [-InstanceNumber <Int32>]
- [-InstanceNumberPadding <Int32>] [-Count <Int32>] [-RandomSuffixLength <Int32>] [-RandomSuffixSeed <Int32>]
- [-ConventionPath <String>] [-NoClean] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-CafResourceName [[-ResourceType] <String>] [-Alias <String>] [-Resource <String>]
+ [-TerraformResourceType <String>] [-Prefix <String[]>] [-Suffix <String[]>] [-Region <String>]
+ [-Separator <String>] [-Casing <String>] [-InstanceNumber <Int32>] [-InstanceNumberPadding <Int32>]
+ [-Count <Int32>] [-RandomSuffixLength <Int32>] [-RandomSuffixSeed <Int32>] [-ConventionPath <String>]
+ [-NoClean] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -59,6 +60,14 @@ Get-CafResourceName -Resource 'Key vault' -Prefix contoso
 
 ### EXAMPLE 5
 ```
+Get-CafResourceName -TerraformResourceType azurerm_storage_account -Prefix contoso -RandomSuffixLength 6
+```
+
+Generates a storage account name identified by its Terraform resource type instead of its ARM
+type, alias or friendly name - a fourth alternative to -ResourceType/-Alias/-Resource.
+
+### EXAMPLE 6
+```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Region eastus
 ```
 
@@ -66,7 +75,7 @@ Generates 'contoso-prod-vm-eus' - -Region resolves 'eastus' to its CAF-recommend
 the same way -ResourceType resolves to its slug, and inserts it after any -Suffix, so -Suffix
 always comes right after the resource type's slug.
 
-### EXAMPLE 6
+### EXAMPLE 7
 ```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix Contoso, Prod -Casing Upper
 ```
@@ -74,7 +83,7 @@ Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix Cont
 Generates 'CONTOSO-PROD-VM' - -Casing re-cases every segment, including the resource type's
 own 'vm' slug, without needing to retype -Prefix/-Suffix in a particular case.
 
-### EXAMPLE 7
+### EXAMPLE 8
 ```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -InstanceNumber 1
 ```
@@ -82,14 +91,14 @@ Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix cont
 Generates 'contoso-prod-vm-001' - -InstanceNumber is zero-padded to 3 digits by default, matching
 the Cloud Adoption Framework's own example names such as 'vm-sql-test-001'.
 
-### EXAMPLE 8
+### EXAMPLE 9
 ```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso, prod -Count 3
 ```
 
 Generates 'contoso-prod-vm-001', 'contoso-prod-vm-002' and 'contoso-prod-vm-003' in one call.
 
-### EXAMPLE 9
+### EXAMPLE 10
 ```
 Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6
 ```
@@ -97,14 +106,14 @@ Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix cont
 Generates a storage account name such as 'contosostabcdef', with 6 random characters appended to
 help ensure the globally-unique name doesn't collide with one that already exists.
 
-### EXAMPLE 10
+### EXAMPLE 11
 ```
 Get-CafResourceName -ResourceType Microsoft.Storage/storageAccounts -Prefix contoso -RandomSuffixLength 6 -RandomSuffixSeed 42
 ```
 
 Generates the same storage account name every time it's run, since the random suffix is seeded.
 
-### EXAMPLE 11
+### EXAMPLE 12
 ```
 Get-CafResourceName -ResourceType Microsoft.Web/sites -Resource 'Function app' -Prefix contoso, prod
 ```
@@ -113,7 +122,7 @@ Generates a function app name.
 -Resource is required here because 'Microsoft.Web/sites' is also
 used for web apps, which use a different abbreviation.
 
-### EXAMPLE 12
+### EXAMPLE 13
 ```
 Get-CafResourceName -ResourceType Microsoft.Web/sites -Alias func -Prefix contoso, prod
 ```
@@ -121,7 +130,7 @@ Get-CafResourceName -ResourceType Microsoft.Web/sites -Alias func -Prefix contos
 Equivalent to the previous example - -Alias disambiguates 'Microsoft.Web/sites' just like
 -Resource does, if you already know the abbreviation rather than the friendly name.
 
-### EXAMPLE 13
+### EXAMPLE 14
 ```
 Get-CafResourceType -Slug kv | Get-CafResourceName -Prefix contoso -RandomSuffixLength 4
 ```
@@ -129,7 +138,7 @@ Get-CafResourceType -Slug kv | Get-CafResourceName -Prefix contoso -RandomSuffix
 Pipes the resource type definition for the 'kv' (Key Vault) abbreviation straight into
 Get-CafResourceName.
 
-### EXAMPLE 14
+### EXAMPLE 15
 ```
 Get-CafResourceName -ResourceType Microsoft.Compute/virtualMachines -Prefix contoso -ConventionPath ./contoso.json
 ```
@@ -138,7 +147,7 @@ Uses -Prefix explicitly, but falls back to whatever -Suffix/-Region/-Separator/e
 are saved in
 contoso.json (see New-CafNamingConvention) for anything not specified here.
 
-### EXAMPLE 15
+### EXAMPLE 16
 ```
 Import-Csv ./resources.csv | Get-CafResourceName
 ```
@@ -197,6 +206,29 @@ Required alongside either when an ARM type covers more than one kind of resource
 Type: String
 Parameter Sets: (All)
 Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -TerraformResourceType
+The Terraform azurerm resource type to generate a name for, e.g.
+'azurerm_storage_account' - a
+fourth alternative to -ResourceType/-Alias/-Resource.
+A resource type with more than one
+current real azurerm equivalent (e.g.
+a virtual machine's Linux/Windows variants) resolves from
+either one; $null for resource types Terraform doesn't model distinctly.
+Use Get-CafResourceType
+to check coverage.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: Tf
 
 Required: False
 Position: Named
